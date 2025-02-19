@@ -19,13 +19,13 @@ jobs:
         id: calc
         run: |
           INPUT=${{ github.event.client_payload.input }}
-          RESULT=$(node -e "console.log(require('./calculate').handler($INPUT))")
+          RESULT=$(node -e "console.log($INPUT * $INPUT)")
           echo "result=$RESULT" >> $GITHUB_OUTPUT
 
       - name: Save Result
         run: |
           echo ${{ steps.calc.outputs.result }} > result.txt
-        
+
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
