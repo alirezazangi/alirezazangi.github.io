@@ -1,18 +1,1289 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اپلیکیشن دعا و زیارت</title>
+    <link rel="manifest" href="#" />
+    <meta name="theme-color" content="#4caf50">
+    <style>
+        :root {
+            --primary-color: #4caf50;
+            --secondary-color: #2e7d32;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --border-color: #ddd;
+            --block-color-1: rgba(76, 175, 80, 0.05);
+            --block-color-2: rgba(76, 175, 80, 0.1);
+            --highlight-color: rgba(76, 175, 80, 0.3);
+            --reading-highlight: rgba(255, 215, 0, 0.2);
+            --translation-background: #f9f9f9;
+            --translation-border: var(--primary-color);
+            --font-size-normal: 1.2rem;
+        }
 
-<div class="posts">
-  {% for post in site.posts %}
-    <article class="post">
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-      <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-      <div class="entry">
-        {{ post.excerpt }}
-      </div>
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 60px);
+        }
 
-      <a href="{{ site.baseurl }}{{ post.url }}" class="read-more">Read More</a>
-    </article>
-  {% endfor %}
-</div>
+        /* منوی اصلی */
+        .main-menu {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        .menu-item {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            width: calc(50% - 2rem);
+            max-width: 160px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .menu-item-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-container {
+            padding: 1rem;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .prayer-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 0 0 8px 8px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .prayer-list li {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .prayer-list li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .prayer-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: white;
+            margin: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .prayer-block {
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .prayer-block:nth-child(odd) {
+            background-color: var(--block-color-1);
+        }
+
+        .prayer-block:nth-child(even) {
+            background-color: var(--block-color-2);
+        }
+
+        .prayer-block.highlighted {
+            background-color: var(--highlight-color);
+        }
+
+        .prayer-block.reading {
+            background-color: var(--reading-highlight);
+        }
+
+        .prayer-text {
+            font-size: var(--font-size-normal);
+            line-height: 2;
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+
+        .translation {
+            font-size: calc(var(--font-size-normal) - 0.2rem);
+            line-height: 1.6;
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background-color: var(--translation-background);
+            border-radius: 4px;
+            border-right: 4px solid var(--translation-border);
+        }
+
+        .translation-fa {
+            color: #333;
+        }
+
+        .translation-en {
+            color: #555;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            background-color: white;
+            position: sticky;
+            bottom: 0;
+            border-top: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-icon {
+            margin-right: 0.5rem;
+        }
+
+        .settings-panel {
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .settings-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+        }
+
+        .font-size-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .font-size-btn {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cached-notice {
+            padding: 0.5rem;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .download-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .dialog-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .dialog-title {
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .dialog-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        audio {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        /* حالت شب */
+        .dark-mode {
+            --background-color: #121212;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+            --block-color-1: rgba(76, 175, 80, 0.1);
+            --block-color-2: rgba(76, 175, 80, 0.15);
+            --highlight-color: rgba(76, 175, 80, 0.25);
+            --reading-highlight: rgba(255, 215, 0, 0.3);
+            --translation-background: #252525;
+            --translation-border: #4caf50;
+        }
+        
+        .dark-mode .prayer-container, 
+        .dark-mode .search-container, 
+        .dark-mode .controls, 
+        .dark-mode .settings-panel,
+        .dark-mode .menu-item,
+        .dark-mode .dialog-content {
+            background-color: #1e1e1e;
+        }
+        
+        .dark-mode .prayer-list li:hover,
+        .dark-mode .menu-item:hover {
+            background-color: #2a2a2a;
+        }
+        
+        .dark-mode .translation-fa {
+            color: #e0e0e0;
+        }
+        
+        .dark-mode .translation-en {
+            color: #ccc;
+        }
+        
+        .dark-mode .cached-notice {
+            background-color: #1b3a1e;
+            color: #e0e0e0;
+        }
+
+        @media (max-width: 600px) {
+            .menu-item {
+                width: calc(50% - 2rem);
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>دعا و زیارت</h1>
+    </header>
+
+    <div class="app-container">
+        <!-- منوی اصلی -->
+        <div class="main-menu" id="mainMenu">
+			<div class="menu-item" id="searchMenuItem">
+                <div class="menu-item-icon">🔍</div>
+                <div>جستجو</div>
+            </div>
+            <div class="menu-item" data-prayer="ashura">
+                <div class="menu-item-icon">📿</div>
+                <div>زیارت عاشورا</div>
+            </div>
+            <div class="menu-item" data-prayer="ahd">
+                <div class="menu-item-icon">🤲</div>
+                <div>دعای عهد</div>
+            </div>
+            <div class="menu-item" data-prayer="tawassul">
+                <div class="menu-item-icon">🕋</div>
+                <div>دعای توسل</div>
+            </div>
+            <div class="menu-item" data-prayer="kumayl">
+                <div class="menu-item-icon">📔</div>
+                <div>دعای کمیل</div>
+            </div>
+            <div class="menu-item" data-prayer="sabah">
+                <div class="menu-item-icon">☀️</div>
+                <div>دعای صباح</div>
+            </div>
+        </div>
+
+        <div class="search-container" style="display: none;">
+            <input type="text" class="search-box" placeholder="جستجوی دعا..." onclick="togglePrayerList()">
+            <ul class="prayer-list" id="prayerList">
+                <li data-prayer="ashura">زیارت عاشورا</li>
+                <li data-prayer="ahd">دعای عهد</li>
+                <li data-prayer="tawassul">دعای توسل</li>
+                <li data-prayer="kumayl">دعای کمیل</li>
+                <li data-prayer="sabah">دعای صباح</li>
+            </ul>
+        </div>
+
+        <div class="settings-panel" id="settingsPanel" style="display: none;">
+            <div class="settings-group">
+                <label class="toggle-label">
+                    <input type="checkbox" id="toggleFa" checked> ترجمه فارسی
+                </label>
+                <label class="toggle-label">
+                    <input type="checkbox" id="toggleEn"> ترجمه انگلیسی
+                </label>
+            </div>
+            
+            <div class="settings-group">
+                <label class="toggle-label">
+                    <input type="checkbox" id="darkModeToggle"> حالت شب
+                </label>
+            </div>
+            
+            <div class="settings-group font-size-controls">
+                <span>اندازه متن:</span>
+                <div class="font-size-btn" id="decreaseFontBtn">-</div>
+                <div class="font-size-btn" id="increaseFontBtn">+</div>
+            </div>
+        </div>
+
+        <div class="prayer-container" id="prayerContainer">
+            <audio id="audioPlayer" controls>
+                <source src="" type="audio/mpeg">
+                مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
+            </audio>
+
+            <div id="cacheNotice" style="display: none;" class="cached-notice">
+                <span>این دعا در دستگاه شما ذخیره شده است.</span>
+                <button class="btn" id="removeCacheBtn">حذف از حافظه</button>
+            </div>
+
+            <div id="prayerContent"></div>
+        </div>
+
+        <div class="controls" id="prayerControls" style="display: none;">
+            <button class="btn" id="backBtn"><span class="btn-icon">⬅️</span> برگشت</button>
+            <button class="btn" id="settingsBtn"><span class="btn-icon">⚙️</span> تنظیمات</button>
+            <button class="btn" id="keepScreenOn"><span class="btn-icon">💡</span> نگه داشتن صفحه روشن</button>
+            <button class="btn" id="playPauseBtn"><span class="btn-icon" id="playIcon">▶️</span> پخش</button>
+        </div>
+    </div>
+
+    <!-- دیالوگ دانلود -->
+    <div class="download-dialog" id="downloadDialog" style="display: none;">
+        <div class="dialog-content">
+            <h3 class="dialog-title">ذخیره‌سازی دعا</h3>
+            <div class="dialog-info">
+                <p>آیا مایل هستید این دعا را برای استفاده آفلاین ذخیره کنید؟</p>
+                <p>حجم تقریبی: <span id="fileSize">2.5</span> مگابایت</p>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn" id="cancelDownloadBtn">انصراف</button>
+                <button class="btn" id="confirmDownloadBtn">ذخیره کردن</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // پیاده‌سازی PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(function() {
+                console.log('Service Worker Registered');
+            });
+        }
+
+        // داده‌های دعا
+        const prayers = {
+            ashura: {
+                name: "زیارت عاشورا",
+                verses: [
+                    {
+      "arabic": "بِسْمِ اللهِ الرَّحْمنِ الرَّحِيمِ",
+      "farsi": "به نام خداوند بخشنده مهربان",
+      "english": "In the name of Allah, the Most Gracious, the Most Merciful"
+    },
+    {
+      "arabic": "اَلسَّلامُ عَلَيْكَ يا اَبا عَبْدِاللَّهِ",
+      "farsi": "سلام بر تو ای ابا عبدالله",
+      "english": "Peace be upon you, O Aba Abdullah"
+    },
+    {
+      "arabic": "اَلسَّلامُ عَلَيْكَ يَا بْنَ رَسُولِ اللَّهِ",
+      "farsi": "سلام بر تو ای فرزند رسول خدا",
+      "english": "Peace be upon you, O son of the Messenger of Allah"
+    },
+    {
+      "arabic": "اَلسَّلامُ عَلَيْكَ يَا بْنَ اَميرِ الْمُؤْمِنينَ وَابْنَ سَيِّدِ الْوَصِيّينَ",
+      "farsi": "سلام بر تو ای فرزند امیر مؤمنان و فرزند سرور جانشینان",
+      "english": "Peace be upon you, O son of the Commander of the Faithful and son of the leader of the successors"
+    },
+    {
+      "arabic": "اَلسَّلامُ عَلَيْكَ يَا بْنَ فاطِمَةَ سَيِّدَةِ نِساءِ الْعالَمينَ",
+      "farsi": "سلام بر تو ای فرزند فاطمه سرور زنان جهانیان",
+      "english": "Peace be upon you, O son of Fatima, the leader of the women of the worlds"
+    },
+    {
+      "arabic": "اَلسَّلامُ عَلَيْكَ يا ثارَ اللَّهِ وَابْنَ ثارِهِ وَالْوِتْرَ الْمَوْتُورَ",
+      "farsi": "سلام بر تو ای خون خدا و فرزند خون او و ای تنهای ستمدیده",
+      "english": "Peace be upon you, O the blood of Allah and the son of His blood, and the one who was alone and oppressed"
+    },
+    {
+      "arabic": "اَلسَّلامُ عَلَيْكَ وَعَلَى الْاَرْواحِ الَّتي حَلَّتْ بِفِنائِكَ",
+      "farsi": "سلام بر تو و بر جان‌هایی که در آستان تو فرود آمدند",
+      "english": "Peace be upon you and upon the souls who descended in your courtyard"
+    },
+    {
+      "arabic": "عَلَيْكُمْ مِنّي جَميعاً سَلامُ اللَّهِ اَبَداً ما بَقيتُ وَبَقِيَ اللَّيْلُ وَالنَّهارُ",
+      "farsi": "بر همه شما از من سلام خدا باد، همیشه تا هستم و تا شب و روز باقی است",
+      "english": "Upon all of you from me is the peace of Allah forever, as long as I exist and as long as the night and day remain"
+    },
+    {
+      "arabic": "يا اَبا عَبْدِاللَّهِ لَقَدْ عَظُمَتِ الرَّزِيَّةُ وَجَلَّتْ وَعَظُمَتِ الْمُصيبَةُ بِكَ عَلَيْنا وَعَلى جَميعِ اَهْلِ الْاِسْلامِ",
+      "farsi": "ای ابا عبدالله به راستی که مصیبت بزرگ شد و عظیم گشت، و بزرگ شد این مصیبت تو بر ما و بر همه اهل اسلام",
+      "english": "O Aba Abdullah, the tragedy is great and immense, and your calamity is great upon us and upon all the people of Islam"
+    },
+    {
+      "arabic": "وَجَلَّتْ وَعَظُمَتْ مُصيبَتُكَ فِي السَّماواتِ عَلى جَميعِ اَهْلِ السَّماواتِ",
+      "farsi": "و بزرگ و عظیم است مصیبت تو در آسمان‌ها بر تمام اهل آسمان‌ها",
+      "english": "And your calamity is great and immense in the heavens upon all the inhabitants of the heavens"
+    },
+    {
+      "arabic": "فَلَعَنَ اللَّهُ اُمَّةً اَسَّسَتْ اَساسَ الظُّلْمِ وَالْجَوْرِ عَلَيْكُمْ اَهْلَ الْبَيْتِ",
+      "farsi": "پس لعنت کند خدا امتی را که پایه‌ستم و جور را بر شما اهل بیت بنا نهادند",
+      "english": "So may Allah curse the people who laid the foundations of oppression and tyranny against you, the People of the House"
+    },
+    {
+      "arabic": "وَلَعَنَ اللَّهُ اُمَّةً دَفَعَتْكُمْ عَنْ مَقامِكُمْ وَاَزالَتْكُمْ عَنْ مَراتِبِكُمُ الَّتي رَتَّبَكُمُ اللَّهُ فيها",
+      "farsi": "و لعنت کند خدا امتی را که شما را از مقامتان راندند و از مرتبه‌هایی که خداوند شما را در آن قرار داده بود، برکنار کردند",
+      "english": "And may Allah curse the people who removed you from your position and displaced you from your ranks which Allah had assigned for you"
+    },
+    {
+      "arabic": "وَلَعَنَ اللَّهُ اُمَّةً قَتَلَتْكُمْ وَلَعَنَ اللَّهُ الْمُمَهِّدينَ لَهُمْ بِالتَّمْكينِ مِنْ قِتالِكُمْ",
+      "farsi": "و لعنت کند خدا امتی را که شما را کشتند، و لعنت کند خدا آماده‌کنندگان برای آنان را به تمکین دادن از جنگ با شما",
+      "english": "And may Allah curse the people who killed you, and may Allah curse those who paved the way for them by enabling them to fight against you"
+    },
+    {
+      "arabic": "بَرِئْتُ اِلَى اللَّهِ وَاِلَيْكُمْ مِنْهُمْ وَمِنْ اَشْياعِهِمْ وَاَتْباعِهِمْ وَاَوْلِيائِهِمْ",
+      "farsi": "بیزارم به سوی خدا و به سوی شما از ایشان و از پیروانشان و دنباله‌روهایشان و دوستدارانشان",
+      "english": "I seek to be free before Allah and before you from them, from their partisans, their followers, and their allies"
+    },
+    {
+      "arabic": "يا اَبا عَبْدِاللَّهِ اِنّي سِلْمٌ لِمَنْ سالَمَكُمْ وَحَرْبٌ لِمَنْ حارَبَكُمْ اِلى يَوْمِ الْقِيامَةِ",
+      "farsi": "ای ابا عبدالله، من تسلیم کسی هستم که با شما از در صلح درآمد و دشمن کسی هستم که با شما جنگید تا روز قیامت",
+      "english": "O Aba Abdullah, I am at peace with those who are at peace with you, and I am at war with those who are at war with you until the Day of Resurrection"
+    },
+    {
+      "arabic": "وَلَعَنَ اللَّهُ آلَ زِياد وَآلَ مَرْوانَ",
+      "farsi": "و لعنت کند خدا خاندان زیاد و خاندان مروان را",
+      "english": "And may Allah curse the family of Ziyad and the family of Marwan"
+    },
+    {
+      "arabic": "وَلَعَنَ اللَّهُ بَني اُمَيَّةَ قاطِبَةً",
+      "farsi": "و لعنت کند خدا همه بنی امیه را",
+      "english": "And may Allah curse all of Bani Umayyah"
+    },
+    {
+      "arabic": "وَلَعَنَ اللَّهُ ابْنَ مَرْجانَةَ",
+      "farsi": "و لعنت کند خدا پسر مرجانه را",
+      "english": "And may Allah curse Ibn Marjanah"
+    },
+    {
+      "arabic": "وَلَعَنَ اللَّهُ عُمَرَ بْنَ سَعْد",
+      "farsi": "و لعنت کند خدا عمر بن سعد را",
+      "english": "And may Allah curse Umar ibn Sa'd"
+    },
+    {
+      "arabic": "وَلَعَنَ اللَّهُ شِمْراً",
+      "farsi": "و لعنت کند خدا شمر را",
+      "english": "And may Allah curse Shimr"
+    },
+    {
+      "arabic": "وَلَعَنَ اللَّهُ اُمَّةً اَسْرَجَتْ وَاَلْجَمَتْ وَتَنَقَّبَتْ لِقِتالِكَ",
+      "farsi": "و لعنت کند خدا امتی را که اسب‌های خود را زین کردند و لگام زدند و نقاب بر چهره کشیدند برای جنگ با تو",
+      "english": "And may Allah curse the people who saddled and bridled [their horses] and veiled [their faces] for fighting against you"
+    },
+    {
+      "arabic": "بِاَبي اَنْتَ وَاُمّي لَقَدْ عَظُمَ مُصابي بِكَ",
+      "farsi": "پدر و مادرم به فدایت، به راستی که بزرگ است مصیبت من به [خاطر مصیبت] تو",
+      "english": "May my father and mother be your ransom, how great is my grief for you"
+    },
+    {
+      "arabic": "فَاَسْاَلُ اللَّهَ الَّذي اَكْرَمَ مَقامَكَ وَاَكْرَمَني بِكَ اَنْ يَرْزُقَني طَلَبَ ثارِكَ مَعَ اِمام مَنْصُور مِنْ اَهْلِ بَيْتِ مُحَمَّد صَلَّى اللَّهُ عَلَيْهِ وَآلِهِ",
+      "farsi": "پس درخواست می‌کنم از خدایی که مقامت را گرامی داشت و مرا به واسطه تو گرامی داشت، که روزی‌ام کند خونخواهی تو را همراه امامی پیروز شده از اهل بیت محمد صلی الله علیه و آله",
+      "english": "So I ask Allah, who has honored your position and honored me through you, to provide me with the opportunity to seek your blood-revenge alongside a victorious Imam from the family of Muhammad, peace be upon him and his family"
+    },
+    {
+      "arabic": "اَللّهُمَّ اجْعَلْني عِنْدَكَ وَجيهاً بِالْحُسَيْنِ عَلَيْهِ السَّلامُ فِي الدُّنْيا وَالْآخِرَةِ",
+      "farsi": "خدایا قرار ده مرا نزد خودت آبرومند به [واسطه] حسین علیه السلام در دنیا و آخرت",
+      "english": "O Allah, make me honored in Your presence through Hussein, peace be upon him, in this world and in the Hereafter"
+    },
+    {
+      "arabic": "يا اَبا عَبْدِاللَّهِ اِنّي اَتَقَرَّبُ اِلَى اللَّهِ وَاِلى رَسُولِهِ وَاِلى اَميرِ الْمُؤْمِنينَ وَاِلى فاطِمَةَ وَاِلَى الْحَسَنِ وَاِلَيْكَ بِمُوالاتِكَ",
+      "farsi": "ای ابا عبدالله من تقرب می‌جویم به سوی خدا و به سوی رسولش و به سوی امیر مؤمنان و به سوی فاطمه و به سوی حسن و به سوی تو، با دوستی تو",
+      "english": "O Aba Abdullah, I seek nearness to Allah and to His Messenger and to the Commander of the Faithful and to Fatima and to Hasan and to you through my love for you"
+    },
+    {
+      "arabic": "وَبِالْبَراءَةِ مِمَّنْ قاتَلَكَ وَنَصَبَ لَكَ الْحَرْبَ",
+      "farsi": "و با بیزاری از کسی که با تو جنگید و برای تو جنگ برپا کرد",
+      "english": "And through disavowal from those who fought against you and initiated war against you"
+    },
+    {
+      "arabic": "وَبِالْبَراءَةِ مِمَّنْ اَسَّسَ اَساسَ الظُّلْمِ وَالْجَوْرِ عَلَيْكُمْ",
+      "farsi": "و با بیزاری از کسی که اساس ستم و جور را بر شما بنا نهاد",
+      "english": "And through disavowal from those who laid the foundation of oppression and tyranny against you"
+    },
+    {
+      "arabic": "وَاَبْرَءُ اِلَى اللَّهِ وَاِلى رَسُولِهِ مِمَّنْ اَسَّسَ اَساسَ ذلِكَ",
+      "farsi": "و بیزاری می‌جویم به سوی خدا و به سوی رسولش از کسی که اساس آن را بنا نهاد",
+      "english": "And I seek to be free before Allah and His Messenger from those who laid the foundation for that"
+    },
+    {
+      "arabic": "وَبَنى عَلَيْهِ بُنْيانَهُ وَجَرى في ظُلْمِهِ وَجَوْرِهِ عَلَيْكُمْ وَعَلى اَشْياعِكُمْ",
+      "farsi": "و بر آن بنا ساخت و جاری شد در ستم و جور او بر شما و بر پیروان شما",
+      "english": "And built upon it their building, and carried on in his oppression and injustice against you and your followers"
+    },
+    {
+      "arabic": "بَرِئْتُ اِلَى اللَّهِ وَاِلَيْكُمْ مِنْهُمْ",
+      "farsi": "بیزارم به سوی خدا و به سوی شما از ایشان",
+      "english": "I seek to be free before Allah and before you from them"
+    },
+    {
+      "arabic": "وَاَتَقَرَّبُ اِلَى اللَّهِ ثُمَّ اِلَيْكُمْ بِمُوالاتِكُمْ وَمُوالاةِ وَلِيِّكُمْ",
+      "farsi": "و تقرب می‌جویم به سوی خدا سپس به سوی شما با دوستی شما و دوستی دوستان شما",
+      "english": "And I seek nearness to Allah, then to you, through my love for you and love for those who love you"
+    },
+    {
+      "arabic": "وَبِالْبَراءَةِ مِنْ اَعْدائِكُمْ وَالنّاصِبينَ لَكُمُ الْحَرْبَ",
+      "farsi": "و با بیزاری از دشمنان شما و برپادارندگان جنگ علیه شما",
+      "english": "And through disavowal from your enemies and those who initiated war against you"
+    },
+    {
+      "arabic": "وَبِالْبَراءَةِ مِنْ اَشْياعِهِمْ وَاَتْباعِهِمْ",
+      "farsi": "و با بیزاری از پیروان و دنباله‌روهای ایشان",
+      "english": "And through disavowal from their partisans and followers"
+    },
+    {
+      "arabic": "اِنّي سِلْمٌ لِمَنْ سالَمَكُمْ وَحَرْبٌ لِمَنْ حارَبَكُمْ",
+      "farsi": "من در صلحم با کسی که با شما در صلح است و در جنگم با کسی که با شما در جنگ است",
+      "english": "I am at peace with those who are at peace with you, and I am at war with those who are at war with you"
+    },
+    {
+      "arabic": "وَوَلِيٌّ لِمَنْ والاكُمْ وَعَدُوٌّ لِمَنْ عاداكُمْ",
+      "farsi": "و دوستم با کسی که شما را دوست دارد و دشمنم با کسی که با شما دشمنی می‌کند",
+      "english": "And I am a friend to those who befriend you, and an enemy to those who show enmity towards you"
+    },
+    {
+      "arabic": "فَاَسْاَلُ اللَّهَ الَّذي اَكْرَمَني بِمَعْرِفَتِكُمْ وَمَعْرِفَةِ اَوْلِيائِكُمْ",
+      "farsi": "پس درخواست می‌کنم از خدایی که مرا گرامی داشت با شناخت شما و شناخت دوستان شما",
+      "english": "So I ask Allah, who honored me with your recognition and the recognition of your allies"
+    },
+    {
+      "arabic": "وَرَزَقَنِي الْبَراءَةَ مِنْ اَعْدائِكُمْ",
+      "farsi": "و روزی‌ام کرد بیزاری از دشمنان شما را",
+      "english": "And provided me with disavowal from your enemies"
+    },
+    {
+      "arabic": "اَنْ يَجْعَلَني مَعَكُمْ فِي الدُّنْيا وَالْآخِرَةِ",
+      "farsi": "که قرار دهد مرا با شما در دنیا و آخرت",
+      "english": "To place me with you in this world and in the Hereafter"
+    },
+    {
+      "arabic": "وَاَنْ يُثَبِّتَ لي عِنْدَكُمْ قَدَمَ صِدْق فِي الدُّنْيا وَالْآخِرَةِ",
+      "farsi": "و این که ثابت کند برای من نزد شما گام راستین را در دنیا و آخرت",
+      "english": "And to confirm for me a truthful position with you in this world and in the Hereafter"
+    }
+                ],
+                audio: "https://erfan.ir/files/sound/mafatih/998_128631_ziarat%20ashoora.mp3?seed=10", // لینک نمونه
+                fileSize: "2.5"
+            },
+            ahd: {
+                name: "دعای عهد",
+                verses: [
+                    {
+                        arabic: "اَللّهُمَّ رَبَّ النُّورِ الْعَظيمِ...",
+                        farsi: "خدایا، ای پروردگار نور بزرگ...",
+                        english: "O Allah, Lord of the Great Light..."
+                    },
+                    {
+                        arabic: "وَرَبَّ الْكُرْسِىِّ الرَّفيعِ، وَرَبَّ الْبَحْرِ الْمَسْجُورِ...",
+                        farsi: "و پروردگار کرسی رفیع، و پروردگار دریای پر موج...",
+                        english: "And Lord of the Elevated Throne, and Lord of the swelling sea..."
+                    }
+                    // بقیه آیات دعای عهد اینجا اضافه می‌شوند
+                ],
+                audio: "https://example.com/audio/ahd.mp3", // لینک نمونه
+                fileSize: "1.8"
+            },
+            kumayl: {
+                name: "دعای کمیل",
+                verses: [
+                    {
+                        arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ بِرَحْمَتِكَ الَّتِي وَسِعَتْ كُلَّ شَيْء...",
+                        farsi: "خدایا از تو می‌خواهم به رحمتت که همه چیز را فرا گرفته است...",
+                        english: "O Allah, I ask You by Your mercy which encompasses all things..."
+                    },
+                    {
+                        arabic: "وَبِقُوَّتِكَ الَّتِي قَهَرْتَ بِهَا كُلَّ شَيْء...",
+                        farsi: "و به قدرتت که بر همه چیز چیره شده است...",
+                        english: "And by Your power with which You overwhelm all things..."
+                    }
+                    // بقیه آیات دعای کمیل اینجا اضافه می‌شوند
+                ],
+                audio: "https://example.com/audio/kumayl.mp3", // لینک نمونه
+                fileSize: "3.2"
+            },
+            tawassul: {
+                name: "دعای توسل",
+                verses: [
+                    {
+                        arabic: "اللَّهُمَّ إِنَّا نَتَوَسَّلُ إِلَيْكَ وَنَسْتَشْفِعُ لَدَيْكَ...",
+                        farsi: "خدایا ما به درگاه تو توسل می‌جوییم و از تو شفاعت می‌طلبیم...",
+                        english: "O Allah, we seek means to You and ask for Your intercession..."
+                    },
+                    {
+                        arabic: "بِنَبِيِّكَ نَبِيِّ الرَّحْمَةِ مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَآلِهِ...",
+                        farsi: "به پیامبرت، پیامبر رحمت محمد صلی الله علیه و آله...",
+                        english: "Through Your Prophet, the Prophet of mercy, Muhammad, peace be upon him and his family..."
+                    }
+                    // بقیه آیات دعای توسل اینجا اضافه می‌شوند
+                ],
+                audio: "https://example.com/audio/tawassul.mp3", // لینک نمونه
+                fileSize: "2.1"
+            },
+            sabah: {
+                name: "دعای صباح",
+                verses: [
+                    {
+                        arabic: "اللَّهُمَّ يَا مَنْ دَلَعَ لِسَانَ الصَّبَاحِ بِنُطْقِ تَبَلُّجِهِ...",
+                        farsi: "خدایا ای آنکه زبان صبح را به گویش روشنی‌اش گشود...",
+                        english: "O Allah, Who unfurled the tongue of the morning with its eloquent brightness..."
+                    },
+                    {
+                        arabic: "وَسَرَّحَ قِطَعَ اللَّيْلِ الْمُظْلِمِ بِغَيَاهِبِ تَلَجْلُجِهِ...",
+                        farsi: "و پاره‌های شب تاریک را با تیرگی‌های گنگ آن روان کرد...",
+                        english: "And hastened the dark pieces of night with its obscure stammering..."
+                    }
+                    // بقیه آیات دعای صباح اینجا اضافه می‌شوند
+                ],
+                audio: "https://example.com/audio/sabah.mp3", // لینک نمونه
+                fileSize: "1.9"
+            }
+        };
+
+        // عناصر DOM
+const mainMenu = document.getElementById('mainMenu');
+const searchMenuItem = document.getElementById('searchMenuItem');
+const searchContainer = document.querySelector('.search-container');
+const prayerList = document.getElementById('prayerList');
+const prayerContainer = document.getElementById('prayerContainer');
+const prayerContent = document.getElementById('prayerContent');
+const prayerControls = document.getElementById('prayerControls');
+const settingsPanel = document.getElementById('settingsPanel');
+const toggleFa = document.getElementById('toggleFa');
+const toggleEn = document.getElementById('toggleEn');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const downloadDialog = document.getElementById('downloadDialog');
+const fileSize = document.getElementById('fileSize');
+const confirmDownloadBtn = document.getElementById('confirmDownloadBtn');
+const cancelDownloadBtn = document.getElementById('cancelDownloadBtn');
+const audioPlayer = document.getElementById('audioPlayer');
+const backBtn = document.getElementById('backBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const keepScreenOnBtn = document.getElementById('keepScreenOn');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const playIcon = document.getElementById('playIcon');
+const searchBox = document.querySelector('.search-box');
+const increaseFontBtn = document.getElementById('increaseFontBtn');
+const decreaseFontBtn = document.getElementById('decreaseFontBtn');
+const cacheNotice = document.getElementById('cacheNotice');
+const removeCacheBtn = document.getElementById('removeCacheBtn');
+
+let currentPrayer = null;
+let wakeLock = null;
+let currentVerseIndex = 0;
+let scrolling = false;
+let cached = {};
+let fontSizeLevel = 0;
+let isScreenLocked = false;
+
+// زمان‌بندی هر آیه برای هر دعا (به میلی‌ثانیه)
+const verseTimings = {
+    ashura: [0, 12000, 25000, 38000, 52000, 65000], // مثال
+    ahd: [0, 8000, 15000, 22000, 30000], // مثال
+    kumayl: [0, 15000, 30000, 45000, 60000], // مثال
+    tawassul: [0, 10000, 20000, 30000, 40000], // مثال
+    sabah: [0, 9000, 18000, 27000, 36000] // مثال
+};
+
+// بررسی کش دعاها در هنگام بارگذاری
+function loadCachedItems() {
+    if (localStorage.getItem('cachedPrayers')) {
+        cached = JSON.parse(localStorage.getItem('cachedPrayers'));
+    }
+    
+    // بررسی حالت شب
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.checked = true;
+    }
+    
+    // بررسی اندازه فونت
+    if (localStorage.getItem('fontSize')) {
+        fontSizeLevel = parseInt(localStorage.getItem('fontSize'));
+        updateFontSize();
+    }
+}
+
+// ذخیره کش دعاها
+function saveCachedItems() {
+    localStorage.setItem('cachedPrayers', JSON.stringify(cached));
+}
+
+// منوی اصلی
+mainMenu.addEventListener('click', function(e) {
+    const menuItem = e.target.closest('.menu-item');
+    if (!menuItem) return;
+    
+    if (menuItem.id === 'searchMenuItem') {
+        // نمایش بخش جستجو
+        mainMenu.style.display = 'none';
+        searchContainer.style.display = 'block';
+        prayerControls.style.display = 'flex';
+    } else {
+        const prayerKey = menuItem.getAttribute('data-prayer');
+        if (prayerKey) {
+            loadPrayer(prayerKey);
+        }
+    }
+});
+
+// نمایش/مخفی کردن لیست دعاها
+function togglePrayerList() {
+    prayerList.style.display = prayerList.style.display === 'none' || prayerList.style.display === '' ? 'block' : 'none';
+}
+
+// نمایش/مخفی کردن پنل تنظیمات
+settingsBtn.addEventListener('click', function() {
+    settingsPanel.style.display = settingsPanel.style.display === 'none' || settingsPanel.style.display === '' ? 'flex' : 'none';
+});
+
+// جستجوی دعاها
+searchBox.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const items = prayerList.getElementsByTagName('li');
+    
+    for (let i = 0; i < items.length; i++) {
+        const text = items[i].textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            items[i].style.display = 'block';
+        } else {
+            items[i].style.display = 'none';
+        }
+    }
+    
+    prayerList.style.display = 'block';
+});
+
+// انتخاب دعا
+prayerList.addEventListener('click', function(e) {
+    if (e.target.tagName === 'LI') {
+        const prayerKey = e.target.getAttribute('data-prayer');
+        loadPrayer(prayerKey);
+        prayerList.style.display = 'none';
+        searchBox.value = prayers[prayerKey].name;
+    }
+});
+
+// بارگذاری دعا
+function loadPrayer(prayerKey) {
+    currentPrayer = prayerKey;
+    const prayer = prayers[prayerKey];
+    
+    // نمایش محتوای دعا
+    mainMenu.style.display = 'none';
+    searchContainer.style.display = 'none';
+    prayerContainer.style.display = 'block';
+    prayerControls.style.display = 'flex';
+    
+    // تنظیم فایل صوتی
+    audioPlayer.src = prayer.audio;
+    
+    // نمایش اعلان کش شده
+    if (cached[prayerKey]) {
+        cacheNotice.style.display = 'flex';
+    } else {
+        cacheNotice.style.display = 'none';
+    }
+    
+    // پاک کردن محتوای قبلی
+    prayerContent.innerHTML = '';
+    
+    // افزودن آیات دعا
+    prayer.verses.forEach((verse, index) => {
+        const verseElement = document.createElement('div');
+        verseElement.className = 'prayer-block';
+        verseElement.setAttribute('data-index', index);
+        verseElement.setAttribute('data-time', verseTimings[prayerKey][index]);
+        
+        const arabicElement = document.createElement('div');
+        arabicElement.className = 'prayer-text';
+        arabicElement.textContent = verse.arabic;
+        verseElement.appendChild(arabicElement);
+        
+        const farsiElement = document.createElement('div');
+        farsiElement.className = 'translation translation-fa';
+        farsiElement.textContent = verse.farsi;
+        farsiElement.style.display = toggleFa.checked ? 'block' : 'none';
+        verseElement.appendChild(farsiElement);
+        
+        const englishElement = document.createElement('div');
+        englishElement.className = 'translation translation-en';
+        englishElement.textContent = verse.english;
+        englishElement.style.display = toggleEn.checked ? 'block' : 'none';
+        verseElement.appendChild(englishElement);
+        
+        verseElement.addEventListener('click', function() {
+            // برجسته کردن بلوک انتخاب شده
+            document.querySelectorAll('.prayer-block').forEach(block => {
+                block.classList.remove('highlighted');
+            });
+            this.classList.add('highlighted');
+            
+            // تنظیم موقعیت صوت
+            const timePosition = parseInt(this.getAttribute('data-time'));
+            audioPlayer.currentTime = timePosition / 1000;
+            currentVerseIndex = parseInt(this.getAttribute('data-index'));
+        });
+        
+        prayerContent.appendChild(verseElement);
+    });
+    
+    // تنظیم فایل سایز برای دیالوگ دانلود
+    fileSize.textContent = prayer.fileSize;
+}
+
+// تنظیمات نوع ترجمه
+toggleFa.addEventListener('change', function() {
+    document.querySelectorAll('.translation-fa').forEach(el => {
+        el.style.display = this.checked ? 'block' : 'none';
+    });
+});
+
+toggleEn.addEventListener('change', function() {
+    document.querySelectorAll('.translation-en').forEach(el => {
+        el.style.display = this.checked ? 'block' : 'none';
+    });
+});
+
+// تنظیم حالت شب
+darkModeToggle.addEventListener('change', function() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', this.checked);
+});
+
+// تنظیم اندازه فونت
+increaseFontBtn.addEventListener('click', function() {
+    fontSizeLevel++;
+    if (fontSizeLevel > 5) fontSizeLevel = 5;
+    updateFontSize();
+    localStorage.setItem('fontSize', fontSizeLevel);
+});
+
+decreaseFontBtn.addEventListener('click', function() {
+    fontSizeLevel--;
+    if (fontSizeLevel < -2) fontSizeLevel = -2;
+    updateFontSize();
+    localStorage.setItem('fontSize', fontSizeLevel);
+});
+
+// بروزرسانی اندازه فونت
+function updateFontSize() {
+    const baseFontSize = 1.2; // اندازه پایه فونت
+    const newSize = baseFontSize + (fontSizeLevel * 0.1);
+    document.documentElement.style.setProperty('--font-size-normal', `${newSize}rem`);
+}
+
+// پخش و توقف صوت
+playPauseBtn.addEventListener('click', function() {
+    if (audioPlayer.src) {
+        if (audioPlayer.paused) {
+            // نمایش دیالوگ دانلود اگر دعا کش نشده باشد
+            if (!cached[currentPrayer]) {
+                downloadDialog.style.display = 'flex';
+            } else {
+                startPlayback();
+            }
+        } else {
+            audioPlayer.pause();
+            playIcon.textContent = '▶️';
+            playPauseBtn.querySelector('div').textContent = 'پخش';
+            
+            // حذف کلاس خوانش از همه بلوک‌ها
+            document.querySelectorAll('.prayer-block').forEach(block => {
+                block.classList.remove('reading');
+            });
+        }
+    }
+});
+
+// شروع پخش صوت
+function startPlayback() {
+    audioPlayer.play();
+    playIcon.textContent = '⏸️';
+    playPauseBtn.querySelector('div').textContent = 'توقف';
+    updateCurrentVerse();
+}
+
+// بروزرسانی آیه فعلی براساس زمان صوت
+function updateCurrentVerse() {
+    if (audioPlayer.paused) return;
+    
+    const currentTime = audioPlayer.currentTime * 1000;
+    const verses = document.querySelectorAll('.prayer-block');
+    let foundActive = false;
+    
+    verses.forEach((verse, index) => {
+        const startTime = parseInt(verse.getAttribute('data-time'));
+        const nextVerse = verses[index + 1];
+        const endTime = nextVerse ? parseInt(nextVerse.getAttribute('data-time')) : Infinity;
+        
+        if (currentTime >= startTime && currentTime < endTime) {
+            // برجسته کردن آیه فعلی
+            verse.classList.add('reading');
+            currentVerseIndex = index;
+            foundActive = true;
+            
+            // اسکرول به آیه فعلی اگر اسکرول دستی انجام نشده باشد
+            if (!scrolling) {
+                verse.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } else {
+            verse.classList.remove('reading');
+        }
+    });
+    
+    // فراخوانی مجدد برای بروزرسانی مداوم
+    requestAnimationFrame(updateCurrentVerse);
+}
+
+// رویداد اسکرول
+prayerContainer.addEventListener('scroll', function() {
+    scrolling = true;
+    clearTimeout(window.scrollEndTimer);
+    window.scrollEndTimer = setTimeout(function() {
+        scrolling = false;
+    }, 2000);
+});
+
+// دکمه بازگشت
+backBtn.addEventListener('click', function() {
+    // توقف صوت
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+    playIcon.textContent = '▶️';
+    
+    // مخفی کردن محتوای دعا و نمایش منوی اصلی
+    prayerContainer.style.display = 'none';
+    prayerControls.style.display = 'none';
+    settingsPanel.style.display = 'none';
+    searchContainer.style.display = 'none';
+    mainMenu.style.display = 'flex';
+    
+    // آزادسازی قفل صفحه
+    releaseWakeLock();
+});
+
+// تایید دانلود
+confirmDownloadBtn.addEventListener('click', function() {
+    downloadDialog.style.display = 'none';
+    
+    // اضافه کردن به کش
+    cached[currentPrayer] = true;
+    saveCachedItems();
+    
+    // نمایش اعلان کش
+    cacheNotice.style.display = 'flex';
+    
+    // شروع پخش
+    startPlayback();
+});
+
+// انصراف از دانلود
+cancelDownloadBtn.addEventListener('click', function() {
+    downloadDialog.style.display = 'none';
+    startPlayback();
+});
+
+// حذف از کش
+removeCacheBtn.addEventListener('click', function() {
+    delete cached[currentPrayer];
+    saveCachedItems();
+    cacheNotice.style.display = 'none';
+});
+
+// قفل نگه داشتن صفحه روشن
+keepScreenOnBtn.addEventListener('click', async function() {
+    if (!isScreenLocked) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            keepScreenOnBtn.innerHTML = '<span class="btn-icon">🔒</span> صفحه قفل شد';
+            isScreenLocked = true;
+        } catch (err) {
+            console.error(`${err.name}, ${err.message}`);
+        }
+    } else {
+        releaseWakeLock();
+    }
+});
+
+// آزادسازی قفل صفحه
+async function releaseWakeLock() {
+    if (wakeLock) {
+        try {
+            await wakeLock.release();
+            wakeLock = null;
+            keepScreenOnBtn.innerHTML = '<span class="btn-icon">💡</span> نگه داشتن صفحه روشن';
+            isScreenLocked = false;
+        } catch (err) {
+            console.error(`${err.name}, ${err.message}`);
+        }
+    }
+}
+
+// بارگذاری فونت‌های زیبا
+function loadBeautifulFonts() {
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Amiri&family=Vazirmatn:wght@400;700&display=swap';
+    document.head.appendChild(fontLink);
+    
+    // اعمال فونت‌ها به استایل
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        .prayer-text {
+            font-family: 'Amiri', serif;
+        }
+        body, .translation {
+            font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+        }
+    `;
+    document.head.appendChild(styleElement);
+}
+
+// تنظیم رویدادهای صوت
+audioPlayer.addEventListener('ended', function() {
+    playIcon.textContent = '▶️';
+    playPauseBtn.querySelector('div').textContent = 'پخش';
+});
+
+// بارگذاری اولیه
+window.addEventListener('load', function() {
+    loadCachedItems();
+    loadBeautifulFonts();
+});
+
+// ثبت سرویس ورکر
+// بروزرسانی بخش ثبت Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('script-improvements.js')
+        .then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+            
+            // بررسی بروزرسانی سرویس ورکر
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                console.log('Service Worker update found!');
+                
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // سرویس ورکر جدید نصب شده و آماده است
+                        showUpdateNotification();
+                    }
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Service Worker registration failed:', error);
+        });
+    
+    // در صورت تغییر سرویس ورکر
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('Service Worker controller changed');
+    });
+}
+
+// نمایش اعلان بروزرسانی
+function showUpdateNotification() {
+    const updateNotice = document.createElement('div');
+    updateNotice.className = 'cached-notice';
+    updateNotice.innerHTML = `
+        <span>نسخه جدید برنامه در دسترس است.</span>
+        <button class="btn" id="updateAppBtn">بروزرسانی</button>
+    `;
+    
+    document.body.appendChild(updateNotice);
+    
+    document.getElementById('updateAppBtn').addEventListener('click', () => {
+        // ارسال پیام به سرویس ورکر برای بروزرسانی
+        navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
+        window.location.reload();
+    });
+}
+
+// بروزرسانی تابع ذخیره دعا در کش
+function cachePrayer(prayerKey, shouldCache) {
+    const prayer = prayers[prayerKey];
+    
+    // ذخیره در localStorage
+    cached[prayerKey] = shouldCache;
+    saveCachedItems();
+    
+    // ارسال دستور به سرویس ورکر
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            action: 'cachePrayer',
+            url: prayer.audio,
+            cache: shouldCache
+        });
+    }
+    
+    // نمایش یا مخفی کردن اعلان کش
+    cacheNotice.style.display = shouldCache ? 'flex' : 'none';
+}
+
+// بروزرسانی تابع تایید دانلود
+confirmDownloadBtn.addEventListener('click', function() {
+    downloadDialog.style.display = 'none';
+    
+    // کش کردن دعا
+    cachePrayer(currentPrayer, true);
+    
+    // شروع پخش
+    startPlayback();
+});
+
+// بروزرسانی تابع حذف از کش
+removeCacheBtn.addEventListener('click', function() {
+    cachePrayer(currentPrayer, false);
+});
+
+// تابع بررسی وضعیت آنلاین/آفلاین
+function updateOnlineStatus() {
+    if (navigator.onLine) {
+        document.body.classList.remove('offline-mode');
+        console.log('برنامه آنلاین شد');
+    } else {
+        document.body.classList.add('offline-mode');
+        console.log('برنامه در حالت آفلاین است');
+        
+        // نمایش اعلان آفلاین
+        const offlineNotice = document.createElement('div');
+        offlineNotice.className = 'cached-notice';
+        offlineNotice.innerHTML = '<span>شما در حالت آفلاین هستید. فقط دعاهای ذخیره شده قابل دسترسی هستند.</span>';
+        offlineNotice.id = 'offlineNotice';
+        
+        // اضافه کردن به صفحه اگر قبلاً نمایش داده نشده باشد
+        if (!document.getElementById('offlineNotice')) {
+            document.body.appendChild(offlineNotice);
+        }
+    }
+}
+
+// رویدادهای آنلاین/آفلاین
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// بررسی وضعیت آنلاین در هنگام بارگذاری
+window.addEventListener('load', function() {
+    loadCachedItems();
+    loadBeautifulFonts();
+    updateOnlineStatus();
+});
+
+    </script>
+</body>
+</html>
+                    
