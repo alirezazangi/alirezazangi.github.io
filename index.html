@@ -2,10 +2,12 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>اپلیکیشن دعا و زیارت</title>
-    <link rel="manifest" href="#" />
+    <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#4caf50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root {
             --primary-color: #4caf50;
@@ -20,6 +22,14 @@
             --translation-background: #f9f9f9;
             --translation-border: var(--primary-color);
             --font-size-normal: 1.2rem;
+            --icon-color: #333;
+            --menu-background: rgba(255, 255, 255, 0.95);
+            --menu-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -31,6 +41,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         header {
@@ -42,12 +53,32 @@
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            flex: 1;
+            text-align: center;
+        }
+
+        .menu-button {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.5rem;
         }
 
         .app-container {
             display: flex;
             flex-direction: column;
             height: calc(100vh - 60px);
+            position: relative;
         }
 
         /* منوی اصلی */
@@ -57,6 +88,8 @@
             justify-content: center;
             padding: 1rem;
             gap: 1rem;
+            overflow-y: auto;
+            height: calc(100vh - 160px);
         }
 
         .menu-item {
@@ -76,6 +109,11 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
+        .menu-item:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
         .menu-item-icon {
             font-size: 2rem;
             margin-bottom: 0.5rem;
@@ -93,6 +131,7 @@
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 1rem;
+            outline: none;
         }
 
         .prayer-list {
@@ -116,7 +155,8 @@
             cursor: pointer;
         }
 
-        .prayer-list li:hover {
+        .prayer-list li:hover, 
+        .prayer-list li:active {
             background-color: #f0f0f0;
         }
 
@@ -125,10 +165,11 @@
             overflow-y: auto;
             padding: 1rem;
             background-color: white;
-            margin: 1rem;
-            border-radius: 8px;
+            margin: 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: none;
+            padding-bottom: 90px; /* فضای کافی برای پخش کننده */
+            -webkit-overflow-scrolling: touch; /* برای اندروید قدیمی */
         }
 
         .prayer-block {
@@ -182,62 +223,143 @@
             text-align: left;
         }
 
-        .controls {
+        .player-container {
             display: flex;
-            justify-content: space-between;
-            padding: 1rem;
+            flex-direction: column;
             background-color: white;
-            position: sticky;
+            position: fixed;
             bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0.5rem;
             border-top: 1px solid var(--border-color);
-            z-index: 10;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 50;
+            transition: all 0.3s ease;
         }
 
-        .btn {
-            padding: 0.75rem 1.5rem;
+        .player-minimized {
+            height: 50px;
+        }
+
+        .player-expanded {
+            height: auto;
+            max-height: 200px;
+        }
+
+        .player-toggle {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 0.25rem;
+            cursor: pointer;
+        }
+
+        .player-toggle:after {
+            content: '▲';
+            display: block;
+            transition: transform 0.3s;
+        }
+
+        .player-minimized .player-toggle:after {
+            transform: rotate(180deg);
+        }
+
+        audio {
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .play-button {
+            padding: 0.5rem 1.5rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 50px;
             background-color: var(--primary-color);
             color: white;
             font-size: 1rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
             transition: background-color 0.3s;
         }
 
-        .btn:hover {
+        .play-button:hover,
+        .play-button:active {
             background-color: var(--secondary-color);
         }
 
-        .btn-icon {
-            margin-right: 0.5rem;
+        .settings-menu {
+            position: fixed;
+            top: 0;
+            right: -80%;
+            width: 80%;
+            height: 100%;
+            background-color: var(--menu-background);
+            box-shadow: var(--menu-shadow);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
-        .settings-panel {
-            background-color: white;
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem;
+        .settings-menu.active {
+            right: 0;
+        }
+
+        .settings-header {
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
+            justify-content: space-between;
             align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .close-menu {
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .settings-section {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-section h3 {
+            margin-top: 0;
         }
 
         .settings-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .toggle-label {
             display: flex;
             align-items: center;
-            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .toggle-label input {
+            margin-left: 0.5rem;
+            width: 18px;
+            height: 18px;
         }
 
         .font-size-controls {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            margin-top: 0.5rem;
         }
 
         .font-size-btn {
@@ -251,16 +373,52 @@
             color: white;
             cursor: pointer;
             font-weight: bold;
+            border: none;
+        }
+
+        .font-size-btn:active {
+            background-color: var(--secondary-color);
         }
 
         .cached-notice {
-            padding: 0.5rem;
+            padding: 0.75rem;
             background-color: #e8f5e9;
             border-radius: 4px;
             margin-bottom: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover,
+        .btn:active {
+            background-color: var(--secondary-color);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
         }
 
         .download-dialog {
@@ -300,9 +458,70 @@
             gap: 1rem;
         }
 
-        audio {
-            width: 100%;
-            margin-bottom: 1rem;
+        .back-button {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 40;
+            transition: transform 0.3s, opacity 0.3s;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .back-button.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .back-button:active {
+            background-color: var(--secondary-color);
+        }
+
+        .offline-notice {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            padding: 0.5rem;
+            background-color: #ffeb3b;
+            color: #333;
+            text-align: center;
+            z-index: 90;
+        }
+
+        .update-notice {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            padding: 0.5rem;
+            background-color: #2196f3;
+            color: white;
+            text-align: center;
+            z-index: 90;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-button {
+            background-color: white;
+            color: #2196f3;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
         /* حالت شب */
@@ -316,15 +535,19 @@
             --reading-highlight: rgba(255, 215, 0, 0.3);
             --translation-background: #252525;
             --translation-border: #4caf50;
+            --icon-color: #ddd;
+            --menu-background: rgba(30, 30, 30, 0.95);
+            --menu-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
         }
         
         .dark-mode .prayer-container, 
         .dark-mode .search-container, 
-        .dark-mode .controls, 
-        .dark-mode .settings-panel,
+        .dark-mode .player-container, 
+        .dark-mode .settings-menu,
         .dark-mode .menu-item,
         .dark-mode .dialog-content {
             background-color: #1e1e1e;
+            color: var(--text-color);
         }
         
         .dark-mode .prayer-list li:hover,
@@ -345,19 +568,46 @@
             color: #e0e0e0;
         }
 
+        .dark-mode .search-box {
+            background-color: #252525;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        .fullscreen-mode header,
+        .fullscreen-mode .player-container.player-minimized {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .fullscreen-mode:hover header,
+        .fullscreen-mode:hover .player-container.player-minimized {
+            opacity: 1;
+        }
+
         @media (max-width: 600px) {
             .menu-item {
                 width: calc(50% - 2rem);
             }
             
-            .controls {
+            .player-controls {
                 flex-wrap: wrap;
-                gap: 0.5rem;
             }
             
-            .btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
+            .settings-menu {
+                width: 85%;
+                right: -85%;
+            }
+        }
+
+        /* برای دستگاه‌های قدیمی */
+        @supports not (backdrop-filter: blur(10px)) {
+            .settings-menu {
+                background-color: white;
+            }
+            
+            .dark-mode .settings-menu {
+                background-color: #1e1e1e;
             }
         }
     </style>
@@ -753,34 +1003,13 @@
             }
         };
 
-        // عناصر DOM
-const mainMenu = document.getElementById('mainMenu');
-const searchMenuItem = document.getElementById('searchMenuItem');
-const searchContainer = document.querySelector('.search-container');
-const prayerList = document.getElementById('prayerList');
-const prayerContainer = document.getElementById('prayerContainer');
-const prayerContent = document.getElementById('prayerContent');
-const prayerControls = document.getElementById('prayerControls');
-const settingsPanel = document.getElementById('settingsPanel');
-const toggleFa = document.getElementById('toggleFa');
-const toggleEn = document.getElementById('toggleEn');
-const darkModeToggle = document.getElementById('darkModeToggle');
-const downloadDialog = document.getElementById('downloadDialog');
-const fileSize = document.getElementById('fileSize');
-const confirmDownloadBtn = document.getElementById('confirmDownloadBtn');
-const cancelDownloadBtn = document.getElementById('cancelDownloadBtn');
-const audioPlayer = document.getElementById('audioPlayer');
-const backBtn = document.getElementById('backBtn');
-const settingsBtn = document.getElementById('settingsBtn');
-const keepScreenOnBtn = document.getElementById('keepScreenOn');
-const playPauseBtn = document.getElementById('playPauseBtn');
-const playIcon = document.getElementById('playIcon');
-const searchBox = document.querySelector('.search-box');
-const increaseFontBtn = document.getElementById('increaseFontBtn');
-const decreaseFontBtn = document.getElementById('decreaseFontBtn');
-const cacheNotice = document.getElementById('cacheNotice');
-const removeCacheBtn = document.getElementById('removeCacheBtn');
 
+// زمان‌بندی هر آیه برای هر دعا (به میلی‌ثانیه)
+const verseTimings = {
+    ashura: [0, 12000, 25000, 38000, 52000, 65000]
+};
+
+// متغیرهای سراسری
 let currentPrayer = null;
 let wakeLock = null;
 let currentVerseIndex = 0;
@@ -788,411 +1017,687 @@ let scrolling = false;
 let cached = {};
 let fontSizeLevel = 0;
 let isScreenLocked = false;
+let fullScreenTimeout = null;
+let isFullScreen = false;
 
-// زمان‌بندی هر آیه برای هر دعا (به میلی‌ثانیه)
-const verseTimings = {
-    ashura: [0, 12000, 25000, 38000, 52000, 65000], // مثال
-    ahd: [0, 8000, 15000, 22000, 30000], // مثال
-    kumayl: [0, 15000, 30000, 45000, 60000], // مثال
-    tawassul: [0, 10000, 20000, 30000, 40000], // مثال
-    sabah: [0, 9000, 18000, 27000, 36000] // مثال
-};
+// عناصر DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // انتخاب عناصر DOM
+    const mainMenu = document.getElementById('mainMenu');
+    const searchMenuItem = document.getElementById('searchMenuItem');
+    const searchContainer = document.querySelector('.search-container');
+    const prayerList = document.getElementById('prayerList');
+    const prayerContainer = document.getElementById('prayerContainer');
+    const prayerContent = document.getElementById('prayerContent');
+    const prayerControls = document.getElementById('prayerControls');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const backBtn = document.getElementById('backBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const searchBox = document.querySelector('.search-box');
+    const cacheNotice = document.getElementById('cacheNotice');
+    const removeCacheBtn = document.getElementById('removeCacheBtn');
+    const downloadDialog = document.getElementById('downloadDialog');
+    const fileSize = document.getElementById('fileSize');
+    const confirmDownloadBtn = document.getElementById('confirmDownloadBtn');
+    const cancelDownloadBtn = document.getElementById('cancelDownloadBtn');
 
-// بررسی کش دعاها در هنگام بارگذاری
-function loadCachedItems() {
-    if (localStorage.getItem('cachedPrayers')) {
-        cached = JSON.parse(localStorage.getItem('cachedPrayers'));
-    }
-    
-    // بررسی حالت شب
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-        darkModeToggle.checked = true;
-    }
-    
-    // بررسی اندازه فونت
-    if (localStorage.getItem('fontSize')) {
-        fontSizeLevel = parseInt(localStorage.getItem('fontSize'));
-        updateFontSize();
-    }
-}
-
-// ذخیره کش دعاها
-function saveCachedItems() {
-    localStorage.setItem('cachedPrayers', JSON.stringify(cached));
-}
-
-// منوی اصلی
-mainMenu.addEventListener('click', function(e) {
-    const menuItem = e.target.closest('.menu-item');
-    if (!menuItem) return;
-    
-    if (menuItem.id === 'searchMenuItem') {
-        // نمایش بخش جستجو
-        mainMenu.style.display = 'none';
-        searchContainer.style.display = 'block';
-        prayerControls.style.display = 'flex';
-    } else {
-        const prayerKey = menuItem.getAttribute('data-prayer');
-        if (prayerKey) {
-            loadPrayer(prayerKey);
-        }
-    }
-});
-
-// نمایش/مخفی کردن لیست دعاها
-function togglePrayerList() {
-    prayerList.style.display = prayerList.style.display === 'none' || prayerList.style.display === '' ? 'block' : 'none';
-}
-
-// نمایش/مخفی کردن پنل تنظیمات
-settingsBtn.addEventListener('click', function() {
-    settingsPanel.style.display = settingsPanel.style.display === 'none' || settingsPanel.style.display === '' ? 'flex' : 'none';
-});
-
-// جستجوی دعاها
-searchBox.addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    const items = prayerList.getElementsByTagName('li');
-    
-    for (let i = 0; i < items.length; i++) {
-        const text = items[i].textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-            items[i].style.display = 'block';
-        } else {
-            items[i].style.display = 'none';
-        }
-    }
-    
-    prayerList.style.display = 'block';
-});
-
-// انتخاب دعا
-prayerList.addEventListener('click', function(e) {
-    if (e.target.tagName === 'LI') {
-        const prayerKey = e.target.getAttribute('data-prayer');
-        loadPrayer(prayerKey);
-        prayerList.style.display = 'none';
-        searchBox.value = prayers[prayerKey].name;
-    }
-});
-
-// بارگذاری دعا
-function loadPrayer(prayerKey) {
-    currentPrayer = prayerKey;
-    const prayer = prayers[prayerKey];
-    
-    // نمایش محتوای دعا
-    mainMenu.style.display = 'none';
-    searchContainer.style.display = 'none';
-    prayerContainer.style.display = 'block';
-    prayerControls.style.display = 'flex';
-    
-    // تنظیم فایل صوتی
-    audioPlayer.src = prayer.audio;
-    
-    // نمایش اعلان کش شده
-    if (cached[prayerKey]) {
-        cacheNotice.style.display = 'flex';
-    } else {
-        cacheNotice.style.display = 'none';
-    }
-    
-    // پاک کردن محتوای قبلی
-    prayerContent.innerHTML = '';
-    
-    // افزودن آیات دعا
-    prayer.verses.forEach((verse, index) => {
-        const verseElement = document.createElement('div');
-        verseElement.className = 'prayer-block';
-        verseElement.setAttribute('data-index', index);
-        verseElement.setAttribute('data-time', verseTimings[prayerKey][index]);
-        
-        const arabicElement = document.createElement('div');
-        arabicElement.className = 'prayer-text';
-        arabicElement.textContent = verse.arabic;
-        verseElement.appendChild(arabicElement);
-        
-        const farsiElement = document.createElement('div');
-        farsiElement.className = 'translation translation-fa';
-        farsiElement.textContent = verse.farsi;
-        farsiElement.style.display = toggleFa.checked ? 'block' : 'none';
-        verseElement.appendChild(farsiElement);
-        
-        const englishElement = document.createElement('div');
-        englishElement.className = 'translation translation-en';
-        englishElement.textContent = verse.english;
-        englishElement.style.display = toggleEn.checked ? 'block' : 'none';
-        verseElement.appendChild(englishElement);
-        
-        verseElement.addEventListener('click', function() {
-            // برجسته کردن بلوک انتخاب شده
-            document.querySelectorAll('.prayer-block').forEach(block => {
-                block.classList.remove('highlighted');
-            });
-            this.classList.add('highlighted');
-            
-            // تنظیم موقعیت صوت
-            const timePosition = parseInt(this.getAttribute('data-time'));
-            audioPlayer.currentTime = timePosition / 1000;
-            currentVerseIndex = parseInt(this.getAttribute('data-index'));
-        });
-        
-        prayerContent.appendChild(verseElement);
-    });
-    
-    // تنظیم فایل سایز برای دیالوگ دانلود
-    fileSize.textContent = prayer.fileSize;
-}
-
-// تنظیمات نوع ترجمه
-toggleFa.addEventListener('change', function() {
-    document.querySelectorAll('.translation-fa').forEach(el => {
-        el.style.display = this.checked ? 'block' : 'none';
-    });
-});
-
-toggleEn.addEventListener('change', function() {
-    document.querySelectorAll('.translation-en').forEach(el => {
-        el.style.display = this.checked ? 'block' : 'none';
-    });
-});
-
-// تنظیم حالت شب
-darkModeToggle.addEventListener('change', function() {
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem('darkMode', this.checked);
-});
-
-// تنظیم اندازه فونت
-increaseFontBtn.addEventListener('click', function() {
-    fontSizeLevel++;
-    if (fontSizeLevel > 5) fontSizeLevel = 5;
-    updateFontSize();
-    localStorage.setItem('fontSize', fontSizeLevel);
-});
-
-decreaseFontBtn.addEventListener('click', function() {
-    fontSizeLevel--;
-    if (fontSizeLevel < -2) fontSizeLevel = -2;
-    updateFontSize();
-    localStorage.setItem('fontSize', fontSizeLevel);
-});
-
-// بروزرسانی اندازه فونت
-function updateFontSize() {
-    const baseFontSize = 1.2; // اندازه پایه فونت
-    const newSize = baseFontSize + (fontSizeLevel * 0.1);
-    document.documentElement.style.setProperty('--font-size-normal', `${newSize}rem`);
-}
-
-// پخش و توقف صوت
-playPauseBtn.addEventListener('click', function() {
-    if (audioPlayer.src) {
-        if (audioPlayer.paused) {
-            // نمایش دیالوگ دانلود اگر دعا کش نشده باشد
-            if (!cached[currentPrayer]) {
-                downloadDialog.style.display = 'flex';
-            } else {
-                startPlayback();
-            }
-        } else {
-            audioPlayer.pause();
-            playIcon.textContent = '▶️';
-            playPauseBtn.querySelector('div').textContent = 'پخش';
-            
-            // حذف کلاس خوانش از همه بلوک‌ها
-            document.querySelectorAll('.prayer-block').forEach(block => {
-                block.classList.remove('reading');
-            });
-        }
-    }
-});
-
-// شروع پخش صوت
-function startPlayback() {
-    audioPlayer.play();
-    playIcon.textContent = '⏸️';
-    playPauseBtn.querySelector('div').textContent = 'توقف';
-    updateCurrentVerse();
-}
-
-// بروزرسانی آیه فعلی براساس زمان صوت
-function updateCurrentVerse() {
-    if (audioPlayer.paused) return;
-    
-    const currentTime = audioPlayer.currentTime * 1000;
-    const verses = document.querySelectorAll('.prayer-block');
-    let foundActive = false;
-    
-    verses.forEach((verse, index) => {
-        const startTime = parseInt(verse.getAttribute('data-time'));
-        const nextVerse = verses[index + 1];
-        const endTime = nextVerse ? parseInt(nextVerse.getAttribute('data-time')) : Infinity;
-        
-        if (currentTime >= startTime && currentTime < endTime) {
-            // برجسته کردن آیه فعلی
-            verse.classList.add('reading');
-            currentVerseIndex = index;
-            foundActive = true;
-            
-            // اسکرول به آیه فعلی اگر اسکرول دستی انجام نشده باشد
-            if (!scrolling) {
-                verse.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        } else {
-            verse.classList.remove('reading');
-        }
-    });
-    
-    // فراخوانی مجدد برای بروزرسانی مداوم
-    requestAnimationFrame(updateCurrentVerse);
-}
-
-// رویداد اسکرول
-prayerContainer.addEventListener('scroll', function() {
-    scrolling = true;
-    clearTimeout(window.scrollEndTimer);
-    window.scrollEndTimer = setTimeout(function() {
-        scrolling = false;
-    }, 2000);
-});
-
-// دکمه بازگشت
-backBtn.addEventListener('click', function() {
-    // توقف صوت
-    audioPlayer.pause();
-    audioPlayer.currentTime = 0;
-    playIcon.textContent = '▶️';
-    
-    // مخفی کردن محتوای دعا و نمایش منوی اصلی
-    prayerContainer.style.display = 'none';
-    prayerControls.style.display = 'none';
-    settingsPanel.style.display = 'none';
-    searchContainer.style.display = 'none';
-    mainMenu.style.display = 'flex';
-    
-    // آزادسازی قفل صفحه
-    releaseWakeLock();
-});
-
-// تایید دانلود
-confirmDownloadBtn.addEventListener('click', function() {
-    downloadDialog.style.display = 'none';
-    
-    // اضافه کردن به کش
-    cached[currentPrayer] = true;
-    saveCachedItems();
-    
-    // نمایش اعلان کش
-    cacheNotice.style.display = 'flex';
-    
-    // شروع پخش
-    startPlayback();
-});
-
-// انصراف از دانلود
-cancelDownloadBtn.addEventListener('click', function() {
-    downloadDialog.style.display = 'none';
-    startPlayback();
-});
-
-// حذف از کش
-removeCacheBtn.addEventListener('click', function() {
-    delete cached[currentPrayer];
-    saveCachedItems();
-    cacheNotice.style.display = 'none';
-});
-
-// قفل نگه داشتن صفحه روشن
-keepScreenOnBtn.addEventListener('click', async function() {
-    if (!isScreenLocked) {
-        try {
-            wakeLock = await navigator.wakeLock.request('screen');
-            keepScreenOnBtn.innerHTML = '<span class="btn-icon">🔒</span> صفحه قفل شد';
-            isScreenLocked = true;
-        } catch (err) {
-            console.error(`${err.name}, ${err.message}`);
-        }
-    } else {
-        releaseWakeLock();
-    }
-});
-
-// آزادسازی قفل صفحه
-async function releaseWakeLock() {
-    if (wakeLock) {
-        try {
-            await wakeLock.release();
-            wakeLock = null;
-            keepScreenOnBtn.innerHTML = '<span class="btn-icon">💡</span> نگه داشتن صفحه روشن';
-            isScreenLocked = false;
-        } catch (err) {
-            console.error(`${err.name}, ${err.message}`);
-        }
-    }
-}
-
-// بارگذاری فونت‌های زیبا
-function loadBeautifulFonts() {
-    const fontLink = document.createElement('link');
-    fontLink.rel = 'stylesheet';
-    fontLink.href = 'https://fonts.googleapis.com/css2?family=Amiri&family=Vazirmatn:wght@400;700&display=swap';
-    document.head.appendChild(fontLink);
-    
-    // اعمال فونت‌ها به استایل
-    const styleElement = document.createElement('style');
-    styleElement.textContent = `
-        .prayer-text {
-            font-family: 'Amiri', serif;
-        }
-        body, .translation {
-            font-family: 'Vazirmatn', 'Tahoma', sans-serif;
-        }
+    // ایجاد دکمه تنظیمات در منوی اصلی
+    const settingsMenuItem = document.createElement('div');
+    settingsMenuItem.className = 'menu-item';
+    settingsMenuItem.id = 'settingsMenuItem';
+    settingsMenuItem.innerHTML = `
+        <div class="menu-item-icon">⚙️</div>
+        <div>تنظیمات</div>
     `;
-    document.head.appendChild(styleElement);
-}
+    mainMenu.appendChild(settingsMenuItem);
 
-// تنظیم رویدادهای صوت
-audioPlayer.addEventListener('ended', function() {
-    playIcon.textContent = '▶️';
-    playPauseBtn.querySelector('div').textContent = 'پخش';
-});
+    // ایجاد دکمه فول اسکرین در منوی اصلی
+    const fullScreenMenuItem = document.createElement('div');
+    fullScreenMenuItem.className = 'menu-item';
+    fullScreenMenuItem.id = 'fullScreenMenuItem';
+    fullScreenMenuItem.innerHTML = `
+        <div class="menu-item-icon">🔍</div>
+        <div>تمام صفحه</div>
+    `;
+    mainMenu.appendChild(fullScreenMenuItem);
 
-// بارگذاری اولیه
-window.addEventListener('load', function() {
+    // ایجاد تنظیمات اندازه متن در منو
+    const fontSizeControls = document.createElement('div');
+    fontSizeControls.className = 'settings-group font-size-controls';
+    fontSizeControls.innerHTML = `
+        <span>اندازه متن:</span>
+        <div class="font-size-btn" id="decreaseFontBtn">-</div>
+        <div class="font-size-btn" id="increaseFontBtn">+</div>
+    `;
+    settingsPanel.appendChild(fontSizeControls);
+
+    // کنترل‌های فونت
+    const increaseFontBtn = document.getElementById('increaseFontBtn');
+    const decreaseFontBtn = document.getElementById('decreaseFontBtn');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const toggleFa = document.getElementById('toggleFa');
+    const toggleEn = document.getElementById('toggleEn');
+
+    // تغییر ساختار کنترل‌های پخش - ثابت نگه داشتن کنترل پخش
+    const audioControls = document.createElement('div');
+    audioControls.className = 'fixed-audio-controls';
+    audioControls.innerHTML = `
+        <div class="audio-control-wrapper">
+            <button class="btn" id="playPauseBtn"><span class="btn-icon" id="playIcon">▶️</span></button>
+            <div class="audio-progress-container">
+                <div class="audio-progress" id="audioProgress"></div>
+            </div>
+            <div class="audio-time" id="audioTime">00:00</div>
+        </div>
+    `;
+    document.querySelector('.app-container').appendChild(audioControls);
+
+    // جایگزینی کنترل‌های اصلی پخش
+    const fixedPlayPauseBtn = document.getElementById('playPauseBtn');
+    const fixedPlayIcon = document.getElementById('playIcon');
+    const audioProgress = document.getElementById('audioProgress');
+    const audioTime = document.getElementById('audioTime');
+
+    // بارگذاری تنظیمات از ذخیره
     loadCachedItems();
     loadBeautifulFonts();
+    updateOnlineStatus();
+
+    // منوی اصلی - کلیک روی آیتم‌ها
+    mainMenu.addEventListener('click', function(e) {
+        const menuItem = e.target.closest('.menu-item');
+        if (!menuItem) return;
+        
+        if (menuItem.id === 'searchMenuItem') {
+            // نمایش بخش جستجو
+            mainMenu.style.display = 'none';
+            searchContainer.style.display = 'block';
+            prayerControls.style.display = 'flex';
+        } else if (menuItem.id === 'settingsMenuItem') {
+            // نمایش تنظیمات در حالت مدال
+            settingsPanel.style.display = 'flex';
+        } else if (menuItem.id === 'fullScreenMenuItem') {
+            // فعال کردن حالت تمام صفحه
+            toggleFullScreen();
+        } else {
+            const prayerKey = menuItem.getAttribute('data-prayer');
+            if (prayerKey) {
+                loadPrayer(prayerKey);
+            }
+        }
+    });
+
+    // رویداد کلیک خارج از پنل تنظیمات برای بستن آن
+    document.addEventListener('click', function(e) {
+        if (settingsPanel.style.display === 'flex' && 
+            !settingsPanel.contains(e.target) && 
+            !e.target.closest('#settingsMenuItem')) {
+            settingsPanel.style.display = 'none';
+        }
+    });
+
+    // جستجو و لیست دعاها
+    searchBox.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const items = prayerList.getElementsByTagName('li');
+        
+        for (let i = 0; i < items.length; i++) {
+            const text = items[i].textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                items[i].style.display = 'block';
+            } else {
+                items[i].style.display = 'none';
+            }
+        }
+        
+        prayerList.style.display = 'block';
+    });
+
+    // نمایش/مخفی کردن لیست دعاها
+    searchBox.addEventListener('click', togglePrayerList);
+
+    // انتخاب دعا از لیست
+    prayerList.addEventListener('click', function(e) {
+        if (e.target.tagName === 'LI') {
+            const prayerKey = e.target.getAttribute('data-prayer');
+            loadPrayer(prayerKey);
+            prayerList.style.display = 'none';
+            searchBox.value = prayers[prayerKey].name;
+        }
+    });
+
+    // کنترل‌های پخش صوت
+    fixedPlayPauseBtn.addEventListener('click', function() {
+        if (audioPlayer.src) {
+            if (audioPlayer.paused) {
+                // نمایش دیالوگ دانلود اگر دعا کش نشده باشد
+                if (!cached[currentPrayer]) {
+                    downloadDialog.style.display = 'flex';
+                } else {
+                    startPlayback();
+                }
+            } else {
+                audioPlayer.pause();
+                fixedPlayIcon.textContent = '▶️';
+                
+                // حذف کلاس خوانش از همه بلوک‌ها
+                document.querySelectorAll('.prayer-block').forEach(block => {
+                    block.classList.remove('reading');
+                });
+            }
+        }
+    });
+
+    // بروزرسانی پیشرفت صوتی
+    audioPlayer.addEventListener('timeupdate', function() {
+        if (audioPlayer.duration) {
+            const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            audioProgress.style.width = percentage + '%';
+            
+            // بروزرسانی زمان
+            const minutes = Math.floor(audioPlayer.currentTime / 60);
+            const seconds = Math.floor(audioPlayer.currentTime % 60);
+            audioTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // نمایش آیه فعلی
+            updateCurrentVerse();
+        }
+    });
+
+    // کلیک روی نوار پیشرفت
+    audioProgress.parentElement.addEventListener('click', function(e) {
+        if (audioPlayer.readyState) {
+            const rect = this.getBoundingClientRect();
+            const position = (e.clientX - rect.left) / rect.width;
+            audioPlayer.currentTime = position * audioPlayer.duration;
+        }
+    });
+
+    // تنظیمات نوع ترجمه
+    toggleFa.addEventListener('change', function() {
+        document.querySelectorAll('.translation-fa').forEach(el => {
+            el.style.display = this.checked ? 'block' : 'none';
+        });
+        localStorage.setItem('showFarsi', this.checked);
+    });
+
+    toggleEn.addEventListener('change', function() {
+        document.querySelectorAll('.translation-en').forEach(el => {
+            el.style.display = this.checked ? 'block' : 'none';
+        });
+        localStorage.setItem('showEnglish', this.checked);
+    });
+
+    // تنظیم حالت شب
+    darkModeToggle.addEventListener('change', function() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', this.checked);
+    });
+
+    // تنظیم اندازه فونت
+    increaseFontBtn.addEventListener('click', function() {
+        fontSizeLevel++;
+        if (fontSizeLevel > 5) fontSizeLevel = 5;
+        updateFontSize();
+        localStorage.setItem('fontSize', fontSizeLevel);
+    });
+
+    decreaseFontBtn.addEventListener('click', function() {
+        fontSizeLevel--;
+        if (fontSizeLevel < -2) fontSizeLevel = -2;
+        updateFontSize();
+        localStorage.setItem('fontSize', fontSizeLevel);
+    });
+
+    // دکمه بازگشت
+    backBtn.addEventListener('click', function() {
+        // توقف صوت
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        fixedPlayIcon.textContent = '▶️';
+        
+        // مخفی کردن محتوای دعا و نمایش منوی اصلی
+        prayerContainer.style.display = 'none';
+        prayerControls.style.display = 'none';
+        settingsPanel.style.display = 'none';
+        searchContainer.style.display = 'none';
+        mainMenu.style.display = 'flex';
+        
+        // آزادسازی قفل صفحه
+        releaseWakeLock();
+        
+        // خروج از حالت تمام صفحه
+        exitFullScreen();
+    });
+
+    // تایید دانلود
+    confirmDownloadBtn.addEventListener('click', function() {
+        downloadDialog.style.display = 'none';
+        
+        // اضافه کردن به کش
+        cachePrayer(currentPrayer, true);
+        
+        // شروع پخش
+        startPlayback();
+    });
+
+    // انصراف از دانلود
+    cancelDownloadBtn.addEventListener('click', function() {
+        downloadDialog.style.display = 'none';
+        startPlayback();
+    });
+
+    // حذف از کش
+    removeCacheBtn.addEventListener('click', function() {
+        cachePrayer(currentPrayer, false);
+    });
+
+    // رویداد اسکرول
+    prayerContainer.addEventListener('scroll', function() {
+        scrolling = true;
+        clearTimeout(window.scrollEndTimer);
+        window.scrollEndTimer = setTimeout(function() {
+            scrolling = false;
+        }, 2000);
+        
+        // تنظیم مجدد تایمر فول اسکرین در صورت اسکرول
+        resetFullScreenTimer();
+    });
+
+    // رویداد کلیک روی محتوای دعا
+    prayerContent.addEventListener('click', function() {
+        // فعال/غیرفعال کردن فول اسکرین با کلیک
+        toggleFullScreen();
+    });
+
+    // رویداد پایان صوت
+    audioPlayer.addEventListener('ended', function() {
+        fixedPlayIcon.textContent = '▶️';
+    });
+
+    // بارگذاری فونت‌ها و تنظیمات
+    window.addEventListener('load', function() {
+        loadCachedItems();
+        loadBeautifulFonts();
+        updateOnlineStatus();
+    });
+
+    // بارگذاری دعا
+    function loadPrayer(prayerKey) {
+        currentPrayer = prayerKey;
+        const prayer = prayers[prayerKey];
+        
+        // نمایش محتوای دعا
+        mainMenu.style.display = 'none';
+        searchContainer.style.display = 'none';
+        prayerContainer.style.display = 'block';
+        prayerControls.style.display = 'flex';
+        
+        // تنظیم فایل صوتی
+        audioPlayer.src = prayer.audio;
+        audioPlayer.load();
+        
+        // نمایش اعلان کش شده
+        if (cached[prayerKey]) {
+            cacheNotice.style.display = 'flex';
+        } else {
+            cacheNotice.style.display = 'none';
+        }
+        
+        // پاک کردن محتوای قبلی
+        prayerContent.innerHTML = '';
+        
+        // افزودن آیات دعا
+        prayer.verses.forEach((verse, index) => {
+            const verseElement = document.createElement('div');
+            verseElement.className = 'prayer-block';
+            verseElement.setAttribute('data-index', index);
+            verseElement.setAttribute('data-time', verseTimings[prayerKey][index]);
+            
+            const arabicElement = document.createElement('div');
+            arabicElement.className = 'prayer-text';
+            arabicElement.textContent = verse.arabic;
+            verseElement.appendChild(arabicElement);
+            
+            const farsiElement = document.createElement('div');
+            farsiElement.className = 'translation translation-fa';
+            farsiElement.textContent = verse.farsi;
+            farsiElement.style.display = localStorage.getItem('showFarsi') !== 'false' ? 'block' : 'none';
+            verseElement.appendChild(farsiElement);
+            
+            const englishElement = document.createElement('div');
+            englishElement.className = 'translation translation-en';
+            englishElement.textContent = verse.english;
+            englishElement.style.display = localStorage.getItem('showEnglish') === 'true' ? 'block' : 'none';
+            verseElement.appendChild(englishElement);
+            
+            verseElement.addEventListener('click', function(e) {
+                e.stopPropagation(); // جلوگیری از فعال شدن فول اسکرین
+                
+                // برجسته کردن بلوک انتخاب شده
+                document.querySelectorAll('.prayer-block').forEach(block => {
+                    block.classList.remove('highlighted');
+                });
+                this.classList.add('highlighted');
+                
+                // تنظیم موقعیت صوت
+                const timePosition = parseInt(this.getAttribute('data-time'));
+                audioPlayer.currentTime = timePosition / 1000;
+                currentVerseIndex = parseInt(this.getAttribute('data-index'));
+            });
+            
+            prayerContent.appendChild(verseElement);
+        });
+        
+        // تنظیم فایل سایز برای دیالوگ دانلود
+        fileSize.textContent = prayer.fileSize;
+        
+        // فعال کردن تایمر فول اسکرین
+        resetFullScreenTimer();
+    }
+
+    // بروزرسانی اندازه فونت
+    function updateFontSize() {
+        const baseFontSize = 1.2; // اندازه پایه فونت
+        const newSize = baseFontSize + (fontSizeLevel * 0.1);
+        document.documentElement.style.setProperty('--font-size-normal', `${newSize}rem`);
+    }
+
+    // شروع پخش صوت
+    function startPlayback() {
+        audioPlayer.play().catch(err => {
+            console.error('Error playing audio:', err);
+            // تلاش مجدد با تعامل کاربر در دستگاه‌های قدیمی
+            const retryBtn = document.createElement('button');
+            retryBtn.className = 'retry-btn';
+            retryBtn.textContent = 'برای پخش کلیک کنید';
+            retryBtn.onclick = function() {
+                audioPlayer.play();
+                this.remove();
+            };
+            prayerContainer.appendChild(retryBtn);
+        });
+        
+        fixedPlayIcon.textContent = '⏸️';
+    }
+
+    // بروزرسانی آیه فعلی براساس زمان صوت
+    function updateCurrentVerse() {
+        if (audioPlayer.paused) return;
+        
+        const currentTime = audioPlayer.currentTime * 1000;
+        const verses = document.querySelectorAll('.prayer-block');
+        let foundActive = false;
+        
+        verses.forEach((verse, index) => {
+            const startTime = parseInt(verse.getAttribute('data-time'));
+            const nextVerse = verses[index + 1];
+            const endTime = nextVerse ? parseInt(nextVerse.getAttribute('data-time')) : Infinity;
+            
+            if (currentTime >= startTime && currentTime < endTime) {
+                // برجسته کردن آیه فعلی
+                verse.classList.add('reading');
+                currentVerseIndex = index;
+                foundActive = true;
+                
+                // اسکرول به آیه فعلی اگر اسکرول دستی انجام نشده باشد
+                if (!scrolling) {
+                    verse.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                verse.classList.remove('reading');
+            }
+        });
+    }
+
+    // بررسی کش دعاها در هنگام بارگذاری
+    function loadCachedItems() {
+        if (localStorage.getItem('cachedPrayers')) {
+            cached = JSON.parse(localStorage.getItem('cachedPrayers'));
+        }
+        
+        // بررسی حالت شب
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+        
+        // بررسی اندازه فونت
+        if (localStorage.getItem('fontSize')) {
+            fontSizeLevel = parseInt(localStorage.getItem('fontSize'));
+            updateFontSize();
+        }
+        
+        // بررسی حالت نمایش ترجمه‌ها
+        if (localStorage.getItem('showFarsi') === 'false') {
+            toggleFa.checked = false;
+        }
+        
+        if (localStorage.getItem('showEnglish') === 'true') {
+            toggleEn.checked = true;
+        }
+    }
+
+    // کش دعاها
+    function cachePrayer(prayerKey, shouldCache) {
+        const prayer = prayers[prayerKey];
+        
+        // ذخیره در localStorage
+        cached[prayerKey] = shouldCache;
+        localStorage.setItem('cachedPrayers', JSON.stringify(cached));
+        
+        // ارسال دستور به سرویس ورکر
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                action: 'cachePrayer',
+                url: prayer.audio,
+                cache: shouldCache
+            });
+        }
+        
+        // نمایش یا مخفی کردن اعلان کش
+        cacheNotice.style.display = shouldCache ? 'flex' : 'none';
+    }
+
+    // رهاسازی قفل صفحه
+    async function releaseWakeLock() {
+        if (wakeLock) {
+            try {
+                await wakeLock.release();
+                wakeLock = null;
+                isScreenLocked = false;
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        }
+    }
+
+    // قفل نگه داشتن صفحه روشن
+    async function requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                isScreenLocked = true;
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        }
+    }
+
+    // بارگذاری فونت‌های زیبا با سازگاری بیشتر
+    function loadBeautifulFonts() {
+        // استفاده از روش‌های سازگارتر برای گوشی‌های قدیمی
+        try {
+            const fontLink = document.createElement('link');
+            fontLink.rel = 'stylesheet';
+            fontLink.href = 'https://fonts.googleapis.com/css2?family=Amiri&family=Vazirmatn:wght@400;700&display=swap';
+            document.head.appendChild(fontLink);
+            
+            // اعمال فونت‌ها به استایل
+            const styleElement = document.createElement('style');
+            styleElement.textContent = `
+                .prayer-text {
+                    font-family: 'Amiri', 'Arial', serif;
+                }
+                body, .translation {
+                    font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+                }
+            `;
+            document.head.appendChild(styleElement);
+        } catch (e) {
+            console.error('Error loading fonts:', e);
+        }
+    }
+
+    // تابع بررسی وضعیت آنلاین/آفلاین
+    function updateOnlineStatus() {
+        if (navigator.onLine) {
+            document.body.classList.remove('offline-mode');
+            const offlineNotice = document.getElementById('offlineNotice');
+            if (offlineNotice) offlineNotice.remove();
+        } else {
+            document.body.classList.add('offline-mode');
+            
+            // نمایش اعلان آفلاین
+            if (!document.getElementById('offlineNotice')) {
+                const offlineNotice = document.createElement('div');
+                offlineNotice.className = 'cached-notice';
+                offlineNotice.innerHTML = '<span>شما در حالت آفلاین هستید. فقط دعاهای ذخیره شده قابل دسترسی هستند.</span>';
+                offlineNotice.id = 'offlineNotice';
+                document.body.appendChild(offlineNotice);
+            }
+        }
+    }
+
+    // فعال/غیرفعال کردن حالت تمام صفحه
+    function toggleFullScreen() {
+        if (!isFullScreen) {
+            enterFullScreen();
+        } else {
+            exitFullScreen();
+        }
+        
+        resetFullScreenTimer();
+    }
+
+    // ورود به حالت تمام صفحه
+    function enterFullScreen() {
+        const elem = document.documentElement;
+        
+        try {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+            
+            isFullScreen = true;
+            document.body.classList.add('fullscreen-mode');
+            
+            // فعال کردن قفل صفحه در حالت تمام صفحه
+            requestWakeLock();
+        } catch (e) {
+            console.error('Fullscreen error:', e);
+            // برای دستگاه‌های قدیمی که از fullscreen API پشتیبانی نمی‌کنند
+            document.body.classList.add('fullscreen-mode');
+            isFullScreen = true;
+        }
+    }
+
+    // خروج از حالت تمام صفحه
+    function exitFullScreen() {
+        try {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+            
+            isFullScreen = false;
+            document.body.classList.remove('fullscreen-mode');
+            
+            // آزادسازی قفل صفحه
+            releaseWakeLock();
+        } catch (e) {
+            console.error('Exit fullscreen error:', e);
+            // برای دستگاه‌های قدیمی
+            document.body.classList.remove('fullscreen-mode');
+            isFullScreen = false;
+        }
+    }
+
+    // تنظیم مجدد تایمر فول اسکرین
+    function resetFullScreenTimer() {
+        // اگر در حال پخش دعا هستیم و صفحه کامل نیست
+        if (currentPrayer && !isFullScreen) {
+            clearTimeout(fullScreenTimeout);
+            fullScreenTimeout = setTimeout(() => {
+                if (!audioPlayer.paused) {
+                    enterFullScreen();
+                }
+            }, 5000); // فعال کردن فول اسکرین بعد از 5 ثانیه عدم تعامل
+        }
+    }
+
+    // نمایش/مخفی کردن لیست دعاها
+    function togglePrayerList() {
+        prayerList.style.display = prayerList.style.display === 'none' || prayerList.style.display === '' ? 'block' : 'none';
+    }
+
+    // رویدادهای آنلاین/آفلاین
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // رویدادهای تمام صفحه
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullScreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullScreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullScreenChange);
+
+    function handleFullScreenChange() {
+        isFullScreen = !!document.fullscreenElement || 
+                      !!document.webkitFullscreenElement || 
+                      !!document.mozFullScreenElement ||
+                      !!document.msFullscreenElement;
+        
+        document.body.classList.toggle('fullscreen-mode', isFullScreen);
+    }
+
+    // فعال‌سازی سرویس ورکر با مدیریت خطا برای دستگاه‌های قدیمی
+    initServiceWorker();
 });
 
-// ثبت سرویس ورکر
-// بروزرسانی بخش ثبت Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('script-improvements.js')
-        .then(registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
-            
-            // بررسی بروزرسانی سرویس ورکر
-            registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                console.log('Service Worker update found!');
+// ثبت سرویس ورکر با پشتیبانی از دستگاه‌های قدیمی
+function initServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('script-improvements.js')
+            .then(registration => {
+                console.log('Service Worker registered with scope:', registration.scope);
                 
-                newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // سرویس ورکر جدید نصب شده و آماده است
-                        showUpdateNotification();
-                    }
+                // بررسی بروزرسانی سرویس ورکر
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    console.log('Service Worker update found!');
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // سرویس ورکر جدید نصب شده و آماده است
+                            showUpdateNotification();
+                        }
+                    });
                 });
+            })
+            .catch(error => {
+                console.error('Service Worker registration failed:', error);
+                // ادامه برنامه بدون سرویس ورکر
             });
-        })
-        .catch(error => {
-            console.error('Service Worker registration failed:', error);
-        });
-    
-    // در صورت تغییر سرویس ورکر
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('Service Worker controller changed');
-    });
+    }
 }
 
 // نمایش اعلان بروزرسانی
