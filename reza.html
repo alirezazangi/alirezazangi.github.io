@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Multi-Backend Site</title>
+</head>
+<body>
+    <h1>Dynamic Site with Multiple Backends</h1>
+    <form id="dynamicForm">
+        <label for="number">Enter a number:</label>
+        <input type="number" id="number" required>
+        <button type="submit">Submit</button>
+    </form>
+    <h2>Result:</h2>
+    <p id="result">No result yet</p>
+
+    <script>
+        document.getElementById('dynamicForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const number = document.getElementById('number').value;
+
+            let response, data;
+
+            try {
+                // First try Cloudflare Worker
+                response = await fetch('https://alirezazangi.aalirezazangi.workers.dev/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ number: parseInt(number) }),
+                });
+
+                if (!response.ok) throw new Error("Cloudflare Worker failed");
+                data = await response.json();
+            } catch {
+                try {
+                    // Try Vercel if Cloudflare fails
+                    response = await fetch('https://your-vercel-app.vercel.app/api/factorial', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ number: parseInt(number) }),
+                    });
+
+                    if (!response.ok) throw new Error("Vercel failed");
+                    data = await response.json();
+                } catch {
+                    try {
+                        // Finally, fallback to Render if all else fails
+                        response = await fetch('https://your-render-app.onrender.com/factorial', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ number: parseInt(number) }),
+                        });
+
+                        if (!response.ok) throw new Error("Render failed");
+                        data = await response.json();
+                    } catch {
+                        document.getElementById('result').innerText = "All services failed. Try again later.";
+                        return;
+                    }
+                }
+            }
+
+            document.getElementById('result').innerText = `Factorial: ${data.result}`;
+        });
+    </script>
+</body>
+</html>
