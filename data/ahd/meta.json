@@ -1,0 +1,13 @@
+
+{
+  "name": "دعای عهد",
+  "icon": "🤲",
+  "reciters": [
+    {
+      "name": "پیش‌فرض",
+      "timingKey": "default",
+      "audioUrl": "https://erfan.ir/files/sound/mafatih/1012_128639_doa%20ahd%20(erfan.ir).mp3?seed=10",
+      "fileSize": "1.8"
+    }
+  ]
+}

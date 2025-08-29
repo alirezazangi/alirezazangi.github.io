@@ -1,0 +1,13 @@
+
+{
+  "name": "دعای صباح",
+  "icon": "☀️",
+  "reciters": [
+    {
+      "name": "پیش‌فرض",
+      "timingKey": "default",
+      "audioUrl": "https://erfan.ir/files/sound/mafatih/1014_128641_doa%20sabah%20(erfan.ir).mp3?seed=10",
+      "fileSize": "1.5"
+    }
+  ]
+}
