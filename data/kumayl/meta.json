@@ -1,0 +1,13 @@
+
+{
+  "name": "دعای کمیل",
+  "icon": "🌙",
+  "reciters": [
+    {
+      "name": "پیش‌فرض",
+      "timingKey": "default",
+      "audioUrl": "https://erfan.ir/files/sound/mafatih/1004_128636_doa%20komeil.mp3?seed=10",
+      "fileSize": "3.1"
+    }
+  ]
+}

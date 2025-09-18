@@ -1,0 +1,25 @@
+
+{
+  "name": "زیارت عاشورا",
+  "icon": "🕌",
+  "reciters": [
+    {
+      "name": "منصوری",
+      "timingKey": "mansouri",
+      "audioUrl": "https://erfan.ir/files/sound/mafatih/998_128631_ziarat%20ashoora.mp3?seed=10",
+      "fileSize": "2.5"
+    },
+    {
+      "name": "فرهمند",
+      "timingKey": "farahmand",
+      "audioUrl": "https://erfan.ir/files/sound/mafatih/998_128631_ziarat%20ashoora(farahmand).mp3?seed=11",
+      "fileSize": "2.6"
+    },
+    {
+      "name": "سماواتی",
+      "timingKey": "samavati",
+      "audioUrl": "https://erfan.ir/files/sound/mafatih/998_128631_ziarat%20ashoora(samavati).mp3?seed=12",
+      "fileSize": "2.4"
+    }
+  ]
+}
