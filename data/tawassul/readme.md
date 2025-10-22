@@ -3172,5 +3172,404 @@ c) طول موج خط اول سری لایمن (گذار 2→12→1) را برا
 
 من آماده‌ام پاسخ‌های شما را تصحیح کنم و نمره دقیق به شما بدهم! ✨
 
-1
+کارت‌های فلش لایتنر - ساختار اتمی (انگلیسی-فارسی)
 
+سطح ۱ - مفاهیم پایه
+جلو: atomic structure
+پشت: ساختار اتمی
+
+جلو: electron
+پشت: الکترون
+
+جلو: nucleus
+پشت: هسته اتم
+
+جلو: proton
+پشت: پروتون
+
+جلو: neutron
+پشت: نوترون
+
+جلو: orbital
+پشت: اوربیتال (ناحیه احتمالی وجود الکترون)
+
+جلو: quantum number
+پشت: عدد کوانتومی
+
+جلو: energy level
+پشت: سطح انرژی / تراز انرژی
+
+جلو: shell
+پشت: لایه الکترونی
+
+جلو: subshell
+پشت: زیرلایه
+
+جلو: valence electron
+پشt: الکترون ظرفیتی
+
+جلو: core electron
+پشت: الکترون هسته‌ای / الکترون داخلی
+
+جلو: periodic table
+پشت: جدول تناوبی
+
+جلو: period
+پشت: دوره (ردیف افقی در جدول تناوبی)
+
+جلو: group
+پشت: گروه (ستون عمودی در جدول تناوبی)
+
+جلو: transition metal
+پشت: فلز واسطه / فلز انتقالی
+
+جلو: alkali metal
+پشت: فلز قلیایی
+
+جلو: alkaline earth metal
+پشt: فلز قلیایی خاکی
+
+جلو: halogen
+پشت: هالوژن
+
+جلو: noble gas
+پشت: گاز نجیب
+
+جلو: lanthanide
+پشت: لانتانید
+
+جلو: actinide
+پشت: اکتینید
+
+سطح ۲ - مفاهیم مهم
+جلو: ionization energy
+پشت: انرژی یونش (انرژی لازم برای جدا کردن الکترون از اتم)
+
+جلو: electron affinity
+پشت: میل الکترونی (انرژی لازم برای جدا کردن الکترون از یون منفی)
+
+جلو: shielding
+پشت: پوشش دادن / حفاظ (الکترون‌های داخلی بار هسته را کاهش می‌دهند)
+
+جلو: effective nuclear charge
+پشt: بار موثر هسته (Z*)
+
+جلو: aufbau principle
+پشت: اصل آفبائو (پر شدن اوربیتال‌ها از انرژی کم به زیاد)
+
+جلو: Pauli exclusion principle
+پشت: اصل طرد پائولی (هر الکترون باید مجموعه منحصر به فردی از اعداد کوانتومی داشته باشد)
+
+جلو: Hund's rule
+پشت: قاعده هوند (الکترون‌ها اوربیتال‌های مختلف را با اسپین موازی پر می‌کنند)
+
+جلو: wave function
+پشت: تابع موج (ψ)
+
+جلو: probability density
+پشت: چگالی احتمال (ψ²)
+
+جلو: node
+پشt: گره (نقطه‌ای که احتمال وجود الکترون صفر است)
+
+جلو: radial node
+پشت: گره شعاعی (گره کروی شکل)
+
+جلو: angular node
+پشت: گره زاویه‌ای (گره صفحه‌ای یا مخروطی)
+
+جلو: nodal surface
+پشت: سطح گره‌ای
+
+جلو: ground state
+پشt: حالت پایه (کمترین انرژی)
+
+جلو: excited state
+پشت: حالت برانگیخته
+
+جلو: emission spectrum
+پشت: طیف نشری / طیف گسیلی
+
+جلو: absorption spectrum
+پشت: طیف جذبی
+
+جلو: isoelectronic
+پشت: هم‌الکترون (گونه‌هایی با تعداد الکترون یکسان)
+
+جلو: cation
+پشت: کاتیون (یون مثبت)
+
+جلو: anion
+پشت: آنیون (یون منفی)
+
+جلو: atomic radius
+پشt: شعاع اتمی
+
+جلو: ionic radius
+پشت: شعاع یونی
+
+جلو: covalent radius
+پشت: شعاع کووالانسی
+
+سطح ۳ - اصطلاحات تخصصی
+جلو: principal quantum number (n)
+پشت: عدد کوانتومی اصلی - تعیین‌کننده انرژی و اندازه اوربیتال
+
+جلو: angular momentum quantum number (l)
+پشt: عدد کوانتومی تکانه زاویه‌ای - تعیین‌کننده شکل اوربیتال
+
+جلو: magnetic quantum number (m_l)
+پشت: عدد کوانتومی مغناطیسی - تعیین‌کننده جهت اوربیتال در فضا
+
+جلو: spin quantum number (m_s)
+پشت: عدد کوانتومی اسپین - مقدار: +½ یا -½
+
+جلو: s orbital
+پشت: اوربیتال s (کروی شکل، l=0)
+
+جلو: p orbital
+پشt: اوربیتال p (دمبلی شکل، l=1)
+
+جلو: d orbital
+پشت: اوربیتال d (l=2، پنج اوربیتال)
+
+جلو: f orbital
+پشت: اوربیتال f (l=3، هفت اوربیتال)
+
+جلو: degenerate orbitals
+پشت: اوربیتال‌های هم‌انرژی / اوربیتال‌های منحط
+
+جلو: electron configuration
+پشت: آرایش الکترونی
+
+جلو: Schrödinger equation
+پشت: معادله شرودینگر
+
+جلو: Heisenberg uncertainty principle
+پشت: اصل عدم قطعیت هایزنبرگ
+
+جلو: de Broglie wavelength
+پشت: طول موج دوبروی
+
+جلو: Bohr model
+پشت: مدل بور (مدل کهنه اتم)
+
+جلو: quantum mechanics
+پشت: مکانیک کوانتومی
+
+جلو: wave-particle duality
+پشت: دوگانگی موج-ذره
+
+جلو: Planck's constant
+پشt: ثابت پلانک (h = 6.626×10⁻³⁴ J·s)
+
+جلو: Rydberg constant
+پشت: ثابت ریدبرگ (R_H)
+
+جلو: Bohr radius
+پشت: شعاع بور (a₀ = 52.9 pm)
+
+جلو: Coulombic repulsion energy
+پشت: انرژی دافعه کولنی (Π_c)
+
+جلو: exchange energy
+پشت: انرژی تبادلی (Π_e)
+
+جلو: spin multiplicity
+پشت: چندگانگی اسپین (تعداد الکترون‌های جفت نشده + 1)
+
+جلو: parallel spin
+پشت: اسپین موازی
+
+جلو: paired electrons
+پشت: الکترون‌های جفت شده
+
+جلو: unpaired electrons
+پشت: الکترون‌های جفت نشده
+
+سطح ۴ - قوانین و فرمول‌ها
+جلو: Slater's rules
+پشت: قواعد اسلیتر (برای محاسبه بار موثر هسته)
+
+جلو: shielding constant (S)
+پشت: ثابت پوشش دهی - Z* = Z - S
+
+جلو: electron configuration of chromium
+پشت: [Ar] 4s¹ 3d⁵ (استثنا)
+
+جلو: electron configuration of copper
+پشت: [Ar] 4s¹ 3d¹⁰ (استثنا)
+
+جلو: Klechkowsky's rule
+پشt: قاعده کلچکوفسکی (ترتیب پرشدن بر اساس n+l)
+
+جلو: radial probability function
+پشت: تابع احتمال شعاعی (4πr²R²)
+
+جلو: normalized wave function
+پشت: تابع موج نرمال شده (∫ψ²dτ = 1)
+
+جلو: orthogonal wave functions
+پشت: توابع موج متعامد (∫ψ_A ψ_B dτ = 0)
+
+جلو: Balmer series
+پشت: سری بالمر (گذارها به n=2، نور مرئی)
+
+جلو: Lyman series
+پشت: سری لایمن (گذارها به n=1، فرابنفش)
+
+جلو: Paschen series
+پشت: سری پاشن (گذارها به n=3، مادون قرمز)
+
+جلو: spherical coordinates
+پشت: مختصات کروی (r, θ, φ)
+
+جلو: Cartesian coordinates
+پشت: مختصات دکارتی (x, y, z)
+
+سطح ۵ - روندهای تناوبی
+جلو: ionization energy trend across period
+پشت: از چپ به راست افزایش می‌یابد (با استثناهایی)
+
+جلو: ionization energy trend down group
+پشت: از بالا به پایین کاهش می‌یابد
+
+جلو: atomic radius trend across period
+پشt: از چپ به راست کاهش می‌یابد
+
+جلو: atomic radius trend down group
+پشت: از بالا به پایین افزایش می‌یابد
+
+جلو: why does boron have lower IE than beryllium?
+پشت: الکترون 2p بور در اوربیتال بالاتری است که توسط الکترون‌های 2s پوشش داده شده
+
+جلو: why does oxygen have lower IE than nitrogen?
+پشت: الکترون چهارم 2p در اکسیژن باید جفت شود، دافعه الکترون-الکترون باعث کاهش انرژی یونش می‌شود
+
+جلو: lanthanide contraction
+پشت: انقباض لانتانیدی - کاهش اندازه با افزایش عدد اتمی
+
+جلو: why do transition metals lose s electrons first?
+پشت: در کاتیون‌ها، اوربیتال‌های (n-1)d انرژی کمتری از ns دارند
+
+سطح ۶ - مفاهیم پیشرفته
+جلو: Hamiltonian operator
+پشت: عملگر همیلتونی (Ĥψ = Eψ)
+
+جلو: kinetic energy operator
+پشت: عملگر انرژی جنبشی (قسمت اول همیلتونی)
+
+جلو: potential energy operator
+پشت: عملگر انرژی پتانسیل (V = -Ze²/4πε₀r)
+
+جلو: particle in a box
+پشت: ذره در جعبه (مدل ساده مکانیک کوانتومی)
+
+جلو: quantization
+پشت: کوانتیزه شدن (گسسته بودن سطوح انرژی)
+
+جلو: reduced mass
+پشt: جرم کاهش یافته (1/μ = 1/m_e + 1/m_nucleus)
+
+جلو: permittivity of vacuum
+پشت: گذردهی خلاء (4πε₀)
+
+جلو: wavenumber
+پشت: عدد موجی (ν̃ = 1/λ، معمولاً cm⁻¹)
+
+جلو: frequency
+پشت: فرکانس / بسامد (ν)
+
+جلو: wavelength
+پشت: طول موج (λ)
+
+جلو: energy-wavelength relation
+پشt: E = hν = hc/λ = hcν̃
+
+جلو: conical nodal surface
+پشت: سطح گره‌ای مخروطی (مثلاً در d_z²)
+
+جلو: planar nodal surface
+پشت: سطح گره‌ای صفحه‌ای (در اوربیتال‌های p و d)
+
+جلو: electron density
+پشت: چگالی الکترونی
+
+جلو: most probable distance
+پشت: دورترین احتمال (نقطه ماکزیمم در 4πr²R²)
+
+سطح ۷ - محاسبات و مثال‌ها
+جلو: For 2p electron in oxygen, S = ?
+پشت: S = 3.45 (5×0.35 + 2×0.85)
+
+جلو: For 2p electron in oxygen, Z* = ?
+پشt: Z* = 4.55 (8 - 3.45)
+
+جلو: Maximum electrons in s subshell
+پشت: 2 الکترون
+
+جلو: Maximum electrons in p subshell
+پشت: 6 الکترون (3 اوربیتال × 2)
+
+جلو: Maximum electrons in d subshell
+پشت: 10 الکترون (5 اوربیتال × 2)
+
+جلو: Maximum electrons in f subshell
+پشt: 14 الکترون (7 اوربیتال × 2)
+
+جلو: Number of radial nodes in 3p
+پشت: n - l - 1 = 3 - 1 - 1 = 1
+
+جلو: Number of angular nodes in 3p
+پشت: l = 1
+
+جلو: Total nodes in 3p
+پشت: n - 1 = 3 - 1 = 2
+
+جلو: Number of radial nodes in 4d
+پشت: n - l - 1 = 4 - 2 - 1 = 1
+
+جلو: Order of orbital filling (1-18)
+پشت: 1s → 2s → 2p → 3s → 3p → 4s → 3d
+
+جلو: n + l for 4s orbital
+پشت: 4 + 0 = 4
+
+جلو: n + l for 3d orbital
+پشت: 3 + 2 = 5
+
+جلو: which fills first: 4s or 3d?
+پشت: 4s (چون n+l کمتر است)
+
+اصطلاحات اضافی
+جلو: polyelectronic atom
+پشت: اتم چندالکترونی
+
+جلو: one-electron system
+پشت: سیستم تک‌الکترونی (مثل H، He⁺، Li²⁺)
+
+جلو: screening
+پشت: غربال‌گری (مترادف shielding)
+
+جلو: crystal radius
+پشت: شعاع بلوری (برای یون‌ها در کریستال)
+
+جلو: coordination number
+پشت: عدد کوئوردیناسیون / عدد هماهنگی
+
+جلو: standing wave
+پشt: موج ایستا
+
+جلو: operator
+پشت: عملگر (دستورالعملی که روی تابع اعمال می‌شود)
+
+جلو: eigenvalue
+پشت: مقدار ویژه (انرژی در معادله شرودینگر)
+
+جلو: eigenfunction
+پشت: تابع ویژه (تابع موج)
+
+جلو: relativistic effects
+پشت: اثرات نسبیتی
+
+این کارت‌ها برای سیستم لایتنر طراحی شده‌اند و از آسان به دشوار مرتب شده‌اند. می‌توانید آن‌ها را در نرم‌افزار Anki یا هر برنامه فلش کارت دیگری استفاده کنید.
